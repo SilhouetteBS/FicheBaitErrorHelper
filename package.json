@@ -27,7 +27,7 @@
     "review:candidate": "node tools/review-source-candidate.mjs",
     "collect:answers": "node tools/collect-answers-product-pass.mjs",
     "pretest": "npm run generate:catalog",
-    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "test": "node tools/run-tests.mjs",
     "lint:data": "node tools/validate-data.mjs",
     "lint:launch": "node tools/verify-launch-readiness.mjs",
     "smoke": "node tools/smoke-check.mjs",
