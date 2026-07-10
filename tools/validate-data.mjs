@@ -1,25 +1,48 @@
 import { errorEntries, productOptions, sourcePriority, versionOptions } from "../src/data/errors.js";
+import { officialDocumentationErrorEntries } from "../src/data/officialDocumentationErrors.js";
 import { reviewedSources } from "../src/data/reviewedSources.js";
 
 const errors = [];
-const reviewedUrls = new Set(reviewedSources.map((source) => source.url));
+const reviewedByUrl = new Map(reviewedSources.map((source) => [source.url, source]));
 const validProducts = new Set(productOptions);
 const validVersions = new Set(versionOptions);
+const validConfidences = new Set(["low", "medium", "high"]);
 const validFixStatuses = new Set(["known-fix", "workaround", "diagnostic-only", "unresolved", "needs-review"]);
 const validValidationStatuses = new Set(["official-doc-baseline", "reviewed-diagnostic", "source-research-needed"]);
 const sortedProducts = [...productOptions].sort((a, b) => a.localeCompare(b));
+const entryIds = new Set();
+const ledgerIds = new Set();
+const ledgerUrls = new Set();
+
+function isIsoDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+}
+
+function isHttpUrl(value) {
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
 
 if (productOptions.some((product, index) => product !== sortedProducts[index])) {
   errors.push("productOptions must remain in alphabetical order");
 }
 
 for (const entry of errorEntries) {
+  if (entryIds.has(entry.id)) errors.push(`Duplicate entry id ${entry.id}`);
+  entryIds.add(entry.id);
   for (const field of ["id", "code", "message", "product", "confidence", "reviewedDate", "summary"]) {
     if (!entry[field]) errors.push(`${entry.id || "unknown"} is missing ${field}`);
   }
+  if (!validConfidences.has(entry.confidence)) errors.push(`${entry.id} uses unknown confidence ${entry.confidence}`);
+  if (!isIsoDate(entry.reviewedDate)) errors.push(`${entry.id} uses invalid reviewed date ${entry.reviewedDate}`);
   if (!Array.isArray(entry.versions) || entry.versions.length === 0) {
     errors.push(`${entry.id} must include at least one version label`);
   }
+  if (!Array.isArray(entry.symptoms) || entry.symptoms.length === 0) errors.push(`${entry.id} must include symptoms`);
+  if (!Array.isArray(entry.likelyFixes) || entry.likelyFixes.length === 0) errors.push(`${entry.id} must include likely fixes`);
   if (entry.fixStatus && !validFixStatuses.has(entry.fixStatus)) {
     errors.push(`${entry.id} uses unknown fix status ${entry.fixStatus}`);
   }
@@ -41,8 +64,13 @@ for (const entry of errorEntries) {
     if (!sourcePriority[source.sourceType]) {
       errors.push(`${entry.id} uses unknown source type ${source.sourceType}`);
     }
-    if (!reviewedUrls.has(source.url)) {
+    if (!source.title) errors.push(`${entry.id} has a source without a title`);
+    if (!isHttpUrl(source.url)) errors.push(`${entry.id} has an invalid source URL ${source.url}`);
+    const reviewedSource = reviewedByUrl.get(source.url);
+    if (!reviewedSource) {
       errors.push(`${entry.id} source ${source.url} is not in the reviewed-source ledger`);
+    } else if (reviewedSource.sourceType !== source.sourceType) {
+      errors.push(`${entry.id} source type ${source.sourceType} does not match ledger type ${reviewedSource.sourceType} for ${source.url}`);
     }
   }
   for (const [index, scenario] of (entry.scenarios ?? []).entries()) {
@@ -63,6 +91,29 @@ for (const entry of errorEntries) {
         errors.push(`${scenarioLabel} source ${url} is not listed on the parent entry`);
       }
     }
+  }
+}
+
+for (const source of reviewedSources) {
+  if (ledgerIds.has(source.id)) errors.push(`Duplicate reviewed-source id ${source.id}`);
+  if (ledgerUrls.has(source.url)) errors.push(`Duplicate reviewed-source URL ${source.url}`);
+  ledgerIds.add(source.id);
+  ledgerUrls.add(source.url);
+  for (const field of ["id", "title", "url", "sourceType", "reviewedDate", "reviewStatus"]) {
+    if (!source[field]) errors.push(`${source.id || "unknown reviewed source"} is missing ${field}`);
+  }
+  if (!sourcePriority[source.sourceType]) errors.push(`${source.id} uses unknown source type ${source.sourceType}`);
+  if (!isHttpUrl(source.url)) errors.push(`${source.id} has invalid URL ${source.url}`);
+  if (!isIsoDate(source.reviewedDate)) errors.push(`${source.id} uses invalid reviewed date ${source.reviewedDate}`);
+  if (!Array.isArray(source.productTags)) errors.push(`${source.id} must include productTags`);
+  if (!Array.isArray(source.extractedErrorCodes)) errors.push(`${source.id} must include extractedErrorCodes`);
+}
+
+const publishedProductCodes = new Set(errorEntries.map((entry) => `${entry.product}\u0000${entry.code}`));
+for (const officialEntry of officialDocumentationErrorEntries) {
+  const key = `${officialEntry.product}\u0000${officialEntry.code}`;
+  if (!publishedProductCodes.has(key)) {
+    errors.push(`Official entry ${officialEntry.id} has no published ${officialEntry.product} / ${officialEntry.code} baseline`);
   }
 }
 

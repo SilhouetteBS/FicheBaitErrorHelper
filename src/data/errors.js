@@ -5,6 +5,7 @@ import { curationOverrides } from "./curationOverrides.js";
 import { sourceAugmentations } from "./sourceAugmentations.js";
 import { sourceCandidatePromotions } from "./sourceCandidateReviews.js";
 import { validationTriageOverrides } from "./validationOverrides.js";
+import { sourcePriority } from "./catalogMetadata.js";
 export { productOptions, sourcePriority, sourceTypeOptions, versionOptions } from "./catalogMetadata.js";
 
 const curatedErrorEntries = [
@@ -4061,13 +4062,14 @@ const curatedErrorEntries = [
     ],
   },
   {
-    id: "forms-lff706-unable-to-trigger-routing",
+    id: "forms-lff706-routing-endpoint",
     code: "LFF706",
     message: "Unable to trigger routing.",
     product: "Forms",
     versions: ["Version 11"],
     confidence: "low",
     fixStatus: "diagnostic-only",
+    validationStatus: "reviewed-diagnostic",
     reviewedDate: "2026-06-27",
     summary:
       "Forms can report LFF706 while editing variables in an in-progress instance when the Forms IIS application cannot connect to the Forms Routing Service.",
@@ -21703,9 +21705,9 @@ const curatedErrorEntries = [
   },
 ];
 
-const curatedCodes = new Set(
+const curatedEntryKeys = new Set(
   [...curatedErrorEntries, ...answersChromePromotedErrorEntries, ...supportChromePromotedErrorEntries].map(
-    (entry) => entry.code,
+    (entry) => `${entry.product}\u0000${entry.code}`,
   ),
 );
 
@@ -21769,7 +21771,30 @@ export const baseErrorEntries = [
   ...curatedErrorEntries,
   ...answersChromePromotedErrorEntries,
   ...supportChromePromotedErrorEntries,
-  ...officialDocumentationErrorEntries.filter((entry) => !curatedCodes.has(entry.code)),
+  ...officialDocumentationErrorEntries.filter(
+    (entry) => !curatedEntryKeys.has(`${entry.product}\u0000${entry.code}`),
+  ),
 ].sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }) || a.id.localeCompare(b.id));
 
-export const errorEntries = baseErrorEntries.map(applyCurationOverride);
+const overriddenErrorEntries = baseErrorEntries.map(applyCurationOverride);
+
+export const sourceTypeByUrl = new Map();
+for (const entry of overriddenErrorEntries) {
+  for (const source of entry.sources) {
+    const current = sourceTypeByUrl.get(source.url);
+    if (!current || (sourcePriority[source.sourceType] ?? 99) < (sourcePriority[current] ?? 99)) {
+      sourceTypeByUrl.set(source.url, source.sourceType);
+    }
+  }
+}
+
+export const errorEntries = overriddenErrorEntries.map((entry) => ({
+  ...entry,
+  validationStatus:
+    entry.validationStatus ??
+    (entry.sources.some((source) => source.sourceType === "official-docs") ? "official-doc-baseline" : undefined),
+  sources: entry.sources.map((source) => ({
+    ...source,
+    sourceType: sourceTypeByUrl.get(source.url) ?? source.sourceType,
+  })),
+}));

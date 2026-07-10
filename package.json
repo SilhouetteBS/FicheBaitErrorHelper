@@ -6,11 +6,15 @@
   "homepage": "https://silhouettebs.github.io/LaserficheErrorHelper/",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "predev": "npm run generate:catalog",
     "build": "vite build",
+    "prebuild": "npm run generate:catalog",
     "preview": "vite preview --host 127.0.0.1",
     "generate:official-docs": "node tools/generate-official-doc-data.mjs",
+    "generate:catalog": "node tools/generate-published-catalog.mjs",
     "candidates": "node tools/list-product-candidates.mjs",
     "progress": "node tools/generate-progress-report.mjs",
+    "housekeeping": "node tools/generate-housekeeping-reports.mjs",
     "quality": "node tools/generate-quality-report.mjs",
     "quality:promotion-queue": "node tools/generate-source-promotion-queue.mjs",
     "quality:complete-promotion-queue": "node tools/complete-source-promotion-queue.mjs",
@@ -22,20 +26,22 @@
     "backlog:curate": "node tools/curate-source-backlog.mjs",
     "review:candidate": "node tools/review-source-candidate.mjs",
     "collect:answers": "node tools/collect-answers-product-pass.mjs",
+    "pretest": "npm run generate:catalog",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
     "lint:data": "node tools/validate-data.mjs",
     "lint:launch": "node tools/verify-launch-readiness.mjs",
     "smoke": "node tools/smoke-check.mjs",
     "render:check": "node tools/render-check.mjs",
-    "verify:launch": "npm run lint:data && npm run lint:launch && npm run quality && npm run progress && npm run smoke && npm run build && npm run render:check"
+    "verify:launch": "npm run test && npm run lint:data && npm run lint:launch && npm run quality && npm run progress && npm run housekeeping && npm run build && npm run smoke && npm run render:check"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^5.0.0",
-    "vite": "^7.0.0",
+    "lucide-react": "^1.24.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "playwright": "^1.54.0"
+    "@vitejs/plugin-react": "^6.0.3",
+    "playwright": "^1.54.0",
+    "vite": "^8.1.4"
   }
 }

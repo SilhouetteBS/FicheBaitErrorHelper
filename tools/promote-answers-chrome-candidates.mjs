@@ -1,8 +1,7 @@
 import fs from "node:fs";
 
-const queuePath = "research/answers-chrome-promotion-queue-2026-07-01.json";
+const queuePath = process.argv[2] ?? latestQueuePath();
 const outputPath = "src/data/answersChromePromotions.js";
-const reviewedDate = "2026-07-01";
 const allowedVersions = ["Version 9", "Version 10", "Version 11", "Version 12"];
 const productOptions = [
   "Administration Hub",
@@ -34,6 +33,23 @@ const productOptions = [
 
 function readJson(path) {
   return JSON.parse(fs.readFileSync(path, "utf8").replace(/^\uFEFF/, ""));
+}
+
+function latestQueuePath() {
+  const candidates = fs
+    .readdirSync("research", { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isFile() && /^answers-chrome-promotion-queue-\d{4}-\d{2}-\d{2}\.json$/.test(entry.name),
+    )
+    .map((entry) => `research/${entry.name}`)
+    .sort();
+  if (candidates.length === 0) throw new Error("No Answers Chrome promotion queue was found.");
+  return candidates.at(-1);
+}
+
+function queueDate(path) {
+  return path.match(/(\d{4}-\d{2}-\d{2})\.json$/)?.[1] ?? new Date().toISOString().slice(0, 10);
 }
 
 function slugify(value) {
@@ -139,6 +155,7 @@ function sourceNote(row) {
 }
 
 const queue = readJson(queuePath).promotionQueue;
+const defaultReviewedDate = queueDate(queuePath);
 const byUrl = new Map(queue.map((row) => [row.url, row]));
 const promotedRows = [...byUrl.values()].sort((a, b) => inferProduct(a).localeCompare(inferProduct(b)) || primaryCode(a).localeCompare(primaryCode(b)));
 
@@ -150,6 +167,7 @@ const entries = promotedRows.map((row) => {
   const entryMessage = message(row, code);
   const versions = inferVersions(row);
   const employee = sourceType(row) === "answers-laserfiche-employee";
+  const reviewedDate = row.reviewedDate ?? defaultReviewedDate;
 
   return {
     id,
@@ -193,7 +211,7 @@ const reviewedSources = entries.map((entry) => ({
   title: entry.sources[0].title,
   url: entry.sources[0].url,
   sourceType: entry.sources[0].sourceType,
-  reviewedDate,
+  reviewedDate: entry.reviewedDate,
   productTags: unique([entry.product, ...entry.versions]),
   extractedErrorCodes: entry.code ? [entry.code] : [],
   reviewStatus: "curated-unresolved",
@@ -202,7 +220,7 @@ const reviewedSources = entries.map((entry) => ({
 const publicEntries = entries.map(({ sourceId, ...entry }) => entry);
 
 const output = [
-  "// Generated from research/answers-chrome-promotion-queue-2026-07-01.json.",
+  `// Generated from ${queuePath.replaceAll("\\", "/")}.`,
   "// These entries are intentionally diagnostic-only/needs-review until each source is manually curated into a confirmed fix.",
   `export const answersChromePromotedErrorEntries = ${JSON.stringify(publicEntries, null, 2)};`,
   "",

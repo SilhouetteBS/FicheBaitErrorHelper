@@ -1,11 +1,11 @@
 # Laserfiche Error Helper Progress Report
 
-Generated: 2026-07-02
+Generated: 2026-07-10
 
 ## Summary
 
-- Published helper entries: 2308
-- Reviewed source ledger rows: 1562
+- Published helper entries: 2334
+- Reviewed source ledger rows: 1556
 - Discovery rows tracked: 4081
 - Remaining candidate rows: 71
 
@@ -13,9 +13,9 @@ Generated: 2026-07-02
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 356 |
-| known-fix | 121 |
-| needs-review | 1507 |
+| diagnostic-only | 357 |
+| known-fix | 120 |
+| needs-review | 1533 |
 | workaround | 324 |
 
 ## Source Ledger Review Status
@@ -23,8 +23,8 @@ Generated: 2026-07-02
 | Review status | Sources |
 | --- | --- |
 | cross-product | 65 |
-| curated | 428 |
-| curated-partial | 450 |
+| curated | 425 |
+| curated-partial | 447 |
 | curated-unresolved | 613 |
 | no-matching-posts | 2 |
 | not-actionable | 4 |
@@ -33,8 +33,8 @@ Generated: 2026-07-02
 
 | Source type | Sources |
 | --- | --- |
-| answers-community | 87 |
-| answers-community-confirmed | 546 |
+| answers-community | 71 |
+| answers-community-confirmed | 556 |
 | answers-laserfiche-employee | 282 |
 | answers-search | 70 |
 | official-docs | 16 |
@@ -58,7 +58,7 @@ Generated: 2026-07-02
 | Full Text Search | 17 | 0 |
 | Import Agent | 33 | 3 |
 | Laserfiche Installer | 48 | 1 |
-| Laserfiche Server/Repository Server | 1218 | 24 |
+| Laserfiche Server/Repository Server | 1238 | 24 |
 | Mobile | 18 | 2 |
 | Office Integration | 13 | 0 |
 | Quick Fields | 59 | 6 |
@@ -67,7 +67,7 @@ Generated: 2026-07-02
 | Web Client | 91 | 4 |
 | WebLink | 87 | 12 |
 | Webtools Agent | 5 | 0 |
-| Windows Client/Desktop Client | 233 | 0 |
+| Windows Client/Desktop Client | 239 | 0 |
 | Workflow | 83 | 4 |
 
 ## Next Batch Targets

@@ -4,14 +4,19 @@ import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { browserLaunchOptions } from "./browser-launch.mjs";
 
-const chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = resolve(rootDir, "dist");
 let server;
+let browser;
 
 async function expectVisible(locator, message) {
-  if (!(await locator.isVisible())) throw new Error(message);
+  try {
+    await locator.waitFor({ state: "visible", timeout: 10_000 });
+  } catch {
+    throw new Error(message);
+  }
 }
 
 function contentType(filePath) {
@@ -49,11 +54,11 @@ try {
   server = await startStaticServer();
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}/LaserficheErrorHelper/`;
-  const browser = await chromium.launch({ executablePath: chromePath });
+  browser = await chromium.launch(browserLaunchOptions());
   const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
   const consoleErrors = [];
   page.on("console", (message) => {
-    if (message.type() === "error" && !message.text().includes("favicon.ico")) consoleErrors.push(message.text());
+    if (message.type() === "error") consoleErrors.push(message.text());
   });
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
@@ -61,7 +66,11 @@ try {
 
   await page.getByRole("button", { name: "How it works" }).click();
   await expectVisible(page.getByRole("heading", { name: "How It Works" }), "How It Works dialog did not open.");
-  await page.getByRole("button", { name: "Close dialog" }).click();
+  if (!(await page.getByRole("button", { name: "Close dialog" }).evaluate((button) => button === document.activeElement))) {
+    throw new Error("How It Works dialog did not move focus to its close control.");
+  }
+  await page.keyboard.press("Escape");
+  if (await page.getByRole("dialog").isVisible().catch(() => false)) throw new Error("Escape did not close the dialog.");
 
   await page.getByRole("button", { name: "About" }).click();
   const aboutDialog = page.getByRole("dialog");
@@ -70,6 +79,12 @@ try {
 
   await page.getByRole("button", { name: "More Filters" }).click();
   await expectVisible(page.getByLabel("More filters"), "More Filters panel did not open.");
+  await page.getByLabel("Validation", { exact: true }).selectOption("official-doc-baseline");
+  await page.getByRole("button", { name: "Reset" }).click();
+  await page.getByRole("button", { name: "More Filters" }).click();
+  if ((await page.getByLabel("Validation", { exact: true }).inputValue()) !== "All") {
+    throw new Error("Reset did not clear Validation.");
+  }
 
   await page.getByRole("button", { name: "More Filters" }).click();
   await page.getByRole("button", { name: "Open result filters" }).click();
@@ -81,6 +96,11 @@ try {
 
   await page.getByPlaceholder("Search code, message, symptom, product, or fix").fill("9030");
   await page.waitForURL(/q=9030/);
+  const numericResultText = await page.locator(".pane-heading h2").textContent();
+  const numericResultCount = Number.parseInt(numericResultText, 10);
+  if (!Number.isFinite(numericResultCount) || numericResultCount < 1 || numericResultCount > 10) {
+    throw new Error(`Numeric search returned an implausible result count: ${numericResultText}`);
+  }
   await page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ }).click();
   await page.getByRole("button", { name: /9030 Maximum sessions or licensing limit reached/ }).click();
   await page.waitForURL(/error=/);
@@ -92,15 +112,26 @@ try {
     throw new Error("Correction link does not point to the error-report issue template.");
   }
 
+  await page.getByLabel("Product", { exact: true }).selectOption("Forms");
+  await expectVisible(page.getByText("Get started"), "Filtering out the selected entry did not clear the detail pane.");
+
   await expectVisible(page.getByText("Reviewed Source Ledger"), "Reviewed Source Ledger was not visible.");
+  const faviconStatus = await page.evaluate(() =>
+    fetch("/LaserficheErrorHelper/favicon.ico").then((response) => response.status),
+  );
+  if (faviconStatus !== 200) throw new Error(`Favicon returned HTTP ${faviconStatus}.`);
+  await page.goto(`${baseUrl}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
+  await expectVisible(page.getByText("Likely Fixes"), "Direct error link did not hydrate its product detail module.");
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await browser.close();
+  browser = null;
 
   if (mobileOverflow) throw new Error("Mobile viewport has horizontal overflow.");
   if (consoleErrors.length > 0) throw new Error(`Console errors: ${consoleErrors.join("; ")}`);
   console.log(`Smoke check passed: ${baseUrl}`);
 } finally {
+  if (browser) await browser.close().catch(() => {});
   if (server) {
     await new Promise((resolveClose) => server.close(resolveClose));
   }

@@ -136,7 +136,7 @@ async function main() {
       product: productFor(normalizedSection, code),
       versions: ["Version 12"],
       confidence: "low",
-      reviewedDate: "2026-06-27",
+      reviewedDate: new Date().toISOString().slice(0, 10),
       summary: `Official Laserfiche documentation lists ${code} as: ${sentence(description)}.`,
       symptoms: [
         `Laserfiche reports ${sentence(description)}. [${code}].`,

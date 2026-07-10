@@ -1,11 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const reviewedDate = "2026-07-01";
 const researchDir = "research";
 const outputPath = "src/data/supportChromePromotions.js";
 const reviewedSourcesPath = "src/data/reviewedSources.js";
-const batchPattern = /^support-chrome-search-batch-2026-07-01-\d+\.json$/;
+const batchPattern = /^support-chrome-search-batch-(\d{4}-\d{2}-\d{2})-\d+\.json$/;
 
 const allowedVersions = ["Version 9", "Version 10", "Version 11", "Version 12"];
 const productOptions = [
@@ -287,7 +286,7 @@ function buildEntry(row) {
     versions,
     confidence: "medium",
     fixStatus: "needs-review",
-    reviewedDate,
+    reviewedDate: row.reviewedDate,
     summary: `A Laserfiche Support Knowledge Base article reports ${message} for ${product}. This entry is published so users can discover the source while the exact remediation is still being curated.`,
     symptoms: [
       `The linked Support KB article reports: ${message}.`,
@@ -329,7 +328,7 @@ function buildReferenceSource(row) {
     title: message,
     url: row.url,
     sourceType: "support-knowledge-base",
-    reviewedDate,
+    reviewedDate: row.reviewedDate,
     productTags: unique([product, ...versions]),
     extractedErrorCodes: codes.length > 0 ? codes : [fallbackCode],
     reviewStatus: "curated-unresolved",
@@ -348,7 +347,8 @@ for (const file of fs.readdirSync(researchDir).filter((name) => batchPattern.tes
   for (const row of batch.rows ?? []) {
     const url = normalizeUrl(row.url);
     if (!url || existingUrls.has(url) || rowsByUrl.has(url)) continue;
-    rowsByUrl.set(url, { ...row, url });
+    const fileDate = file.match(batchPattern)?.[1];
+    rowsByUrl.set(url, { ...row, url, reviewedDate: row.reviewedDate ?? batch.reviewedDate ?? fileDate });
   }
 }
 
@@ -370,7 +370,7 @@ const reviewedSources = [
     title: entry.sources[0].title,
     url: entry.sources[0].url,
     sourceType: "support-knowledge-base",
-    reviewedDate,
+    reviewedDate: entry.reviewedDate,
     productTags: unique([entry.product, ...entry.versions]),
     extractedErrorCodes: entry.sourceCodes,
     reviewStatus: "curated-unresolved",
@@ -390,7 +390,7 @@ const sourceCurationQueue = referenceSources.map((source) => ({
 }));
 
 const output = [
-  "// Generated from research/support-chrome-search-batch-2026-07-01-*.json.",
+  "// Generated from research/support-chrome-search-batch-*.json.",
   "// Public entries exclude broad Support KB release-note/list-of-changes articles; those remain in the reviewed-source ledger and curation queue.",
   `export const supportChromePromotedErrorEntries = ${JSON.stringify(publicEntries, null, 2)};`,
   "",

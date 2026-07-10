@@ -23,6 +23,7 @@ body:
       label: Source type
       options:
         - Official Docs
+        - Support Knowledge Base
         - Answers - Laserfiche Employee
         - Answers - Community Confirmed
         - Answers - Community

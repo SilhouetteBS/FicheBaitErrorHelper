@@ -6,8 +6,8 @@ The helper lets users search Laserfiche error codes, messages, products, symptom
 
 Current launch snapshot:
 
-- 1,911 published helper entries.
-- 930 reviewed source ledger rows.
+- A broad catalog of published helper entries across the supported product list.
+- A checked-in reviewed-source ledger linked to every published entry.
 - Official docs, Laserfiche employee replies, community-confirmed replies, and diagnostic-only entries are labeled separately.
 - Many entries are diagnostic-only or official-doc baselines, so users should review source links before applying any fix.
 

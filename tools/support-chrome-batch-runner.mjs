@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const cwd = "C:/Users/BlakeSmith/source/repos/Laserfiche Error Helper";
-const today = "2026-07-01";
-const statePath = path.join(cwd, "research", "support-chrome-search-state-2026-07-01.json");
+const cwd = process.cwd();
+const today = process.env.RESEARCH_DATE ?? new Date().toISOString().slice(0, 10);
+const statePath = path.join(cwd, "research", `support-chrome-search-state-${today}.json`);
 const logPath = path.join(cwd, "research", "support-kb-review-log.json");
 const reviewedSourcesPath = path.join(cwd, "src", "data", "reviewedSources.js");
 
@@ -119,6 +119,10 @@ function supportSourceIds() {
   for (const row of log.reviewedResults ?? []) {
     if (row.kbId) ids.add(String(row.kbId));
   }
+  for (const name of fs.readdirSync(path.join(cwd, "research")).filter((file) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(file))) {
+    const historicalState = readJson(path.join(cwd, "research", name), {});
+    for (const id of historicalState.visitedKbIds ?? []) ids.add(String(id));
+  }
 
   if (fs.existsSync(reviewedSourcesPath)) {
     const sourceText = fs.readFileSync(reviewedSourcesPath, "utf8");
@@ -128,6 +132,15 @@ function supportSourceIds() {
   }
 
   return ids;
+}
+
+function latestHistoricalState() {
+  const candidates = fs
+    .readdirSync(path.join(cwd, "research"))
+    .filter((file) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(file))
+    .filter((file) => path.join(cwd, "research", file) !== statePath)
+    .sort();
+  return candidates.length > 0 ? readJson(path.join(cwd, "research", candidates.at(-1)), {}) : {};
 }
 
 function kbIdFromUrl(url) {
@@ -297,9 +310,10 @@ async function waitForSearchResultsToSettle(tab) {
 }
 
 export async function runSupportChromeBatch(tab, batchSize = 25, maxPagesPerRun = 8, options = {}) {
+  const previousState = latestHistoricalState();
   const state = readJson(statePath, {
     startedAt: new Date().toISOString(),
-    cursor: { queryIndex: 0, page: 1 },
+    cursor: previousState.cursor ?? { queryIndex: 0, page: 1 },
     visitedKbIds: [],
     visitedUrls: [],
     batches: [],
@@ -426,12 +440,14 @@ export async function runSupportChromeBatch(tab, batchSize = 25, maxPagesPerRun 
 }
 
 export async function runSupportChromeQueryBatch(tab, query = "error", batchSize = 25, maxPagesPerRun = 5, options = {}) {
+  const previousState = latestHistoricalState();
   const state = readJson(statePath, {
     startedAt: new Date().toISOString(),
-    cursor: { queryIndex: 0, page: 1 },
+    cursor: previousState.cursor ?? { queryIndex: 0, page: 1 },
     visitedKbIds: [],
     visitedUrls: [],
     batches: [],
+    queryCursors: previousState.queryCursors ?? {},
   });
   state.visitedKbIds ||= [];
   state.visitedUrls ||= [];

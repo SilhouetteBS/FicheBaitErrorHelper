@@ -1,10 +1,10 @@
 # Support KB Research Status
 
-Generated: 2026-07-02T19:17:39.819Z
+Generated: 2026-07-10T19:02:23.053Z
 
 Visited Support KB URLs: 542
-Promoted Support KB entries: 307
-Support KB reviewed-source rows: 536
+Promoted Support KB entries: 313
+Support KB reviewed-source rows: 542
 Search batches captured: 22
 
 ## Open Search Cursors
@@ -19,14 +19,14 @@ Search batches captured: 22
 
 | Product | Promoted Entries |
 | --- | --- |
-| Laserfiche Server/Repository Server | 127 |
+| Laserfiche Server/Repository Server | 129 |
 | WebLink | 50 |
 | Directory Server | 25 |
 | Snapshot | 24 |
 | Web Client | 20 |
 | Forms | 15 |
+| Quick Fields | 14 |
 | Workflow | 12 |
-| Quick Fields | 10 |
 | Audit Trail | 7 |
 | Connector | 4 |
 | Import Agent | 4 |

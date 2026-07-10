@@ -13,11 +13,12 @@ Use this checklist when publishing a public update to the GitHub Pages helper.
 7. Run `npm run quality` and `npm run validation:batches` again if curation or validation triage changed.
 8. Run `npm run progress` when research coverage changed.
 9. Run `npm run lint:launch`.
-10. Run `npm run smoke`.
+10. Run `npm test`.
 11. Run `npm run build`.
-12. Run `npm run render:check`.
-13. For community-ready releases, run `npm run verify:launch`.
-14. Review `git diff --stat` and confirm only intended files changed.
+12. Run `npm run smoke`.
+13. Run `npm run render:check`.
+14. For community-ready releases, run `npm run verify:launch`.
+15. Review `git diff --stat` and confirm only intended files changed.
 
 ## Version Notes
 

@@ -1,4 +1,4 @@
-// Generated from research/support-chrome-search-batch-2026-07-01-*.json.
+// Generated from research/support-chrome-search-batch-*.json.
 // Public entries exclude broad Support KB release-note/list-of-changes articles; those remain in the reviewed-source ledger and curation queue.
 export const supportChromePromotedErrorEntries = [
   {

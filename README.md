@@ -17,15 +17,9 @@ This project is not affiliated with or endorsed by Laserfiche. It is a community
 
 ## Current Launch Snapshot
 
-- Published helper entries: 1,911.
-- Reviewed source ledger rows: 930.
-- Entries needing validation: 0.
-- Known fixes: 106.
-- Workarounds: 315.
-- Diagnostic-only entries: 355.
-- Official-doc or needs-review baseline entries: 1,135.
-- Entries with scenario variants: 20.
-- Repeated-code clusters still needing scenario review: 100.
+Current entry, source, fix-status, product-coverage, and scenario counts are generated in
+`research/progress-report.md` and `research/quality-report.md`. The application calculates its displayed totals directly
+from the published catalog so documentation snapshots do not drift from the live data.
 
 See `docs/known-limitations.md` for the current limitations and safety notes.
 
@@ -60,8 +54,8 @@ npm install
 npm run lint:data
 npm run quality
 npm run progress
-npm run smoke
 npm run build
+npm run smoke
 npm run render:check
 npm run dev
 ```
@@ -69,6 +63,7 @@ npm run dev
 ## Research and Quality Commands
 
 - `npm run progress` updates the broad research coverage report.
+- `npm run housekeeping` refreshes Support KB indexes and current research workspace summaries.
 - `npm run quality` updates `research/quality-report.md`.
 - `npm run validation:batches` updates the validation batch reports.
 - `npm run curation:priority` reviews priority-source candidates.
@@ -78,6 +73,7 @@ npm run dev
 - `npm run backlog:curate` attaches official-doc backlog matches and writes candidate review output.
 - `npm run collect:answers -- "Product Name" 25` runs a bounded product-specific discovery pass.
 - `npm run verify:launch` runs the launch-readiness command set.
+- `npm test` runs focused search and catalog-integrity regression tests.
 
 ## Important Docs
 

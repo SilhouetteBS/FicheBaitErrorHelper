@@ -8,7 +8,12 @@ import {
 } from "../src/data/supportChromePromotions.js";
 
 const researchDir = "research";
-const statePath = path.join(researchDir, "support-chrome-search-state-2026-07-01.json");
+const stateFiles = fs
+  .readdirSync(researchDir)
+  .filter((name) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(name))
+  .sort()
+  .map((name) => path.join(researchDir, name));
+const indexPath = path.join(researchDir, "support-chrome-search-index.md");
 
 function readJson(file, fallback) {
   try {
@@ -51,8 +56,8 @@ const supportNeedsReview = supportChromePromotedErrorEntries.filter((entry) => e
 const supportReviewedSources = reviewedSources.filter(
   (source) => source.id?.startsWith("support-promoted-source-") || source.id?.startsWith("support-reference-source-"),
 );
-const state = readJson(statePath, {});
-const batchRows = (state.batches ?? []).map((batch) => {
+const states = stateFiles.map((file) => ({ file, state: readJson(file, {}) }));
+const batchRows = states.flatMap(({ file, state }) => (state.batches ?? []).map((batch) => {
   const batchData = readJson(batch.batchPath, { rows: [] });
   const products = byCount(batchData.rows ?? [], (row) => row.productHints?.[0] ?? "Unclassified")
     .slice(0, 4)
@@ -60,6 +65,7 @@ const batchRows = (state.batches ?? []).map((batch) => {
     .join("; ");
   const queries = [...new Set((batchData.rows ?? []).map((row) => row.query).filter(Boolean))].join(", ");
   return {
+    runDate: file.match(/(\d{4}-\d{2}-\d{2})\.json$/)?.[1] ?? "Unknown",
     batch: batch.batchNumber,
     rows: batch.count,
     json: batch.batchPath,
@@ -67,8 +73,14 @@ const batchRows = (state.batches ?? []).map((batch) => {
     queries,
     products,
   };
-});
-const openCursors = Object.entries(state.queryCursors ?? {})
+}));
+const latestCursors = new Map();
+const visitedSupportUrls = new Set();
+for (const { state } of states) {
+  for (const [query, cursor] of Object.entries(state.queryCursors ?? {})) latestCursors.set(query, cursor);
+  for (const url of state.visitedUrls ?? []) visitedSupportUrls.add(url);
+}
+const openCursors = [...latestCursors.entries()]
   .filter(([, cursor]) => !cursor.done)
   .map(([query, cursor]) => ({
     query: query.replace(/^query:/, ""),
@@ -143,10 +155,10 @@ const supportStatus = [
   "",
   `Generated: ${new Date().toISOString()}`,
   "",
-  `Visited Support KB URLs: ${(state.visitedUrls ?? []).length}`,
+  `Visited Support KB URLs: ${visitedSupportUrls.size}`,
   `Promoted Support KB entries: ${supportChromePromotedErrorEntries.length}`,
   `Support KB reviewed-source rows: ${supportReviewedSources.length}`,
-  `Search batches captured: ${(state.batches ?? []).length}`,
+  `Search batches captured: ${batchRows.length}`,
   "",
   "## Open Search Cursors",
   "",
@@ -191,6 +203,7 @@ const supportBatchIndex = [
   `Total captured rows: ${batchRows.reduce((sum, row) => sum + row.rows, 0)}`,
   "",
   table(batchRows, [
+    { label: "Run Date", value: (row) => row.runDate },
     { label: "Batch", value: (row) => row.batch },
     { label: "Rows", value: (row) => row.rows },
     { label: "Queries", value: (row) => row.queries },
@@ -228,11 +241,11 @@ const readme = [
 
 fs.writeFileSync(path.join(researchDir, "needs-review-report.md"), needsReviewReport);
 fs.writeFileSync(path.join(researchDir, "support-kb-research-status.md"), supportStatus);
-fs.writeFileSync(path.join(researchDir, "support-chrome-search-index-2026-07-01.md"), supportBatchIndex);
+fs.writeFileSync(indexPath, supportBatchIndex);
 fs.writeFileSync(path.join(researchDir, "README.md"), readme);
 
 console.log(`Wrote ${path.join(researchDir, "needs-review-report.md")}`);
 console.log(`Wrote ${path.join(researchDir, "support-kb-research-status.md")}`);
-console.log(`Wrote ${path.join(researchDir, "support-chrome-search-index-2026-07-01.md")}`);
+console.log(`Wrote ${indexPath}`);
 console.log(`Wrote ${path.join(researchDir, "README.md")}`);
 console.log(`Needs review: ${needsReview.length}; Support reference-only curation sources: ${sourceCurationRows.length}.`);

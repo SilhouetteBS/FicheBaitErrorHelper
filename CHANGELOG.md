@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-10
+
+- Corrected numeric search relevance so error-code searches do not fuzzy-match unrelated digits.
+- Preserved official documentation baselines by deduplicating on product and code instead of code alone.
+- Removed duplicate catalog and ledger identities, normalized source classifications, and expanded data validation.
+- Added generated product-level catalog chunks, lazy detail loading, and parity regression tests.
+- Corrected Reset and filtered-selection behavior and improved dialog, tooltip, group, and ledger accessibility.
+- Made Support KB and Answers research tooling date-independent and refreshed generated research reports.
+- Reordered clean-build verification, added browser checks to Pages CI, and made local/CI browser launching portable.
+- Updated Vite, the React plugin, and Lucide; corrected the Pages favicon path and remaining documentation drift.
+
 ## 2026-06-29
 
 - Changed community contributions to an issue-only model and added a pull request template that redirects unrequested PRs to the issue templates.

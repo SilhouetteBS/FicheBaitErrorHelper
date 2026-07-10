@@ -4,20 +4,12 @@ The helper is ready for community browsing, but it should be read as a research 
 
 ## Current Catalog Snapshot
 
-- Published entries: 1,911.
-- Reviewed source ledger rows: 930.
-- Entries needing validation: 0.
-- Official-documentation baseline entries without attached public Answers fixes: 1,135.
-- Diagnostic-only entries: 355.
-- Entries with known fixes: 106.
-- Entries with workarounds: 315.
-- Entries marked needs-review: 1,135.
-- Repeated-code clusters still needing scenario modeling: 100.
+Current counts are generated in `research/progress-report.md` and `research/quality-report.md`. Those reports are
+regenerated from the published catalog during release verification.
 
 ## Thin Coverage Products
 
-- AI Service has 1 published entry.
-- Webtools Agent has 4 published entries.
+- AI Service and Webtools Agent remain the thinnest product areas in the generated product-coverage report.
 
 These products need more source discovery before the catalog should be treated as broad coverage.
 

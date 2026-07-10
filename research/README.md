@@ -4,10 +4,10 @@ This folder contains source-review artifacts used to build the public Laserfiche
 
 ## Current Published Totals
 
-- Error entries: 2303
+- Error entries: 2334
 - Reviewed sources: 1556
-- Needs-review entries: 378
-- Support KB promoted entries: 307
+- Needs-review entries: 384
+- Support KB promoted entries: 313
 
 ## Key Reports
 

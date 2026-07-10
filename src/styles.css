@@ -172,7 +172,8 @@ a {
   min-width: 178px;
 }
 
-.filter-control span {
+.filter-control > span,
+.filter-control > label {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 650;
@@ -439,9 +440,9 @@ h3 {
 .sort-filter-button:hover,
 .sort-filter-button:focus-visible,
 .sort-filter-button.active {
-  color: var(--brand-blue);
-  background: var(--brand-blue-soft);
-  outline: 1px solid var(--brand-blue-border);
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  outline: 1px solid var(--accent-border);
 }
 
 .result-group {
@@ -1165,8 +1166,7 @@ li + li {
   gap: 5px;
 }
 
-.source-card:hover,
-.ledger-row:hover {
+.source-card:hover {
   text-decoration: underline;
 }
 
@@ -1321,6 +1321,17 @@ li + li {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ledger-source-name a {
+  min-width: 0;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.ledger-source-name a:hover,
+.ledger-source-name a:focus-visible {
+  text-decoration: underline;
 }
 
 .dialog-backdrop {

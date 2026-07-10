@@ -1,39 +1,39 @@
 # Laserfiche Error Helper Quality Report
 
-Generated: 2026-07-02
+Generated: 2026-07-10
 
 ## Summary
 
-- Published entries: 2308
-- Reviewed sources: 1562
+- Published entries: 2334
+- Reviewed sources: 1556
 - Entries needing validation: 0
 - Entries with scenario variants: 20
 - High-priority unresolved reviewed sources: 2
 - Thin-coverage products with fewer than 5 entries: 1
-- Repeated-code clusters to review for scenario modeling: 123
+- Repeated-code clusters to review for scenario modeling: 148
 
 ## Confidence Coverage
 
 | Confidence | Entries |
 | --- | --- |
 | high | 88 |
-| low | 1538 |
+| low | 1564 |
 | medium | 682 |
 
 ## Fix Status Coverage
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 356 |
-| known-fix | 121 |
-| needs-review | 1507 |
+| diagnostic-only | 357 |
+| known-fix | 120 |
+| needs-review | 1533 |
 | workaround | 324 |
 
 ## Validation Triage Coverage
 
 | Validation status | Entries |
 | --- | --- |
-| official-doc-baseline | 1123 |
+| official-doc-baseline | 1194 |
 | reviewed-diagnostic | 801 |
 
 ## Validation Queue by Product
@@ -71,8 +71,8 @@ Generated: 2026-07-02
 | Review status | Sources |
 | --- | --- |
 | cross-product | 65 |
-| curated | 428 |
-| curated-partial | 450 |
+| curated | 425 |
+| curated-partial | 447 |
 | curated-unresolved | 613 |
 | no-matching-posts | 2 |
 | not-actionable | 4 |
@@ -93,8 +93,8 @@ Generated: 2026-07-02
 
 | Product | Published entries | Linked sources |
 | --- | --- | --- |
-| Laserfiche Server/Repository Server | 1218 | 1308 |
-| Windows Client/Desktop Client | 233 | 235 |
+| Laserfiche Server/Repository Server | 1238 | 1328 |
+| Windows Client/Desktop Client | 239 | 241 |
 | Forms | 144 | 181 |
 | Directory Server | 106 | 107 |
 | Web Client | 91 | 98 |

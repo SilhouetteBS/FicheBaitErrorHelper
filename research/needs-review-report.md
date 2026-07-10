@@ -1,22 +1,22 @@
 # Needs Review Queue
 
-Generated: 2026-07-02T19:17:39.816Z
+Generated: 2026-07-10T19:02:23.051Z
 
-Total needs-review entries: 378
-Support KB needs-review entries: 307
+Total needs-review entries: 384
+Support KB needs-review entries: 313
 
 ## By Product
 
 | Product | Needs Review |
 | --- | --- |
-| Laserfiche Server/Repository Server | 144 |
+| Laserfiche Server/Repository Server | 146 |
 | WebLink | 62 |
 | Directory Server | 29 |
 | Snapshot | 25 |
 | Web Client | 25 |
 | Forms | 22 |
+| Quick Fields | 21 |
 | Workflow | 18 |
-| Quick Fields | 17 |
 | Audit Trail | 10 |
 | Connector | 7 |
 | Import Agent | 7 |
@@ -28,7 +28,7 @@ Support KB needs-review entries: 307
 
 | Source Type | Needs Review |
 | --- | --- |
-| support-knowledge-base | 307 |
+| support-knowledge-base | 313 |
 | answers-search | 69 |
 | answers-laserfiche-employee | 2 |
 
@@ -164,10 +164,12 @@ Support KB needs-review entries: 307
 | Laserfiche Server/Repository Server | 7050 | A "Error executing SQL command [7050]" Error Occurs When Performing Records Management Actions on a Deeply-Nested Folder. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1001024/a-error-executing-sql-command-7050-error-occurs-when-performing-records-management-actions-on-a-deeply-nested-folder- |
 | Laserfiche Server/Repository Server | 7050 | A "Failed to load thumbnails. Error executing SQL command [7050]" Error Occurs When Opening a Document. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011015/a-failed-to-load-thumbnails-error-executing-sql-command-7050-error-occurs-when-opening-a-document- |
 | Laserfiche Server/Repository Server | 7050 | An "Error determining word locations. Error executing SQL command [7050]" Error Occurs When Applying Linked Text Annotations | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011038/an-error-determining-word-locations-error-executing-sql-command-7050-error-occurs-when-applying-linked-text-annotations |
+| Laserfiche Server/Repository Server | 7050 | Known Issues with Laserfiche 7.2. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011176/known-issues-with-laserfiche-7-2- |
 | Laserfiche Server/Repository Server | 7050 | An "Error executing SQL command [7050]." Error Occurs When Copying or Moving a Document. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011870/an-error-executing-sql-command-7050-error-occurs-when-copying-or-moving-a-document- |
 | Laserfiche Server/Repository Server | 7050 | 7050: Microsoft SQL Server Error | medium | support-knowledge-base | https://support.laserfiche.com/kb/90200/7050-microsoft-sql-server-error |
 | Laserfiche Server/Repository Server | 7361 | An "Error: Cannot open files (7361)" Error Occurs When Sending Documents From Laserfiche Scanning. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011860/an-error-cannot-open-files-7361-error-occurs-when-sending-documents-from-laserfiche-scanning- |
 | Laserfiche Server/Repository Server | 7366 | An "Error cannot create file 7366." Error Occurs When Publishing. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000662/an-error-cannot-create-file-7366-error-occurs-when-publishing- |
+| Laserfiche Server/Repository Server | 7390 | Known Issues with Laserfiche 7.1.2. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1001078/known-issues-with-laserfiche-7-1-2- |
 | Laserfiche Server/Repository Server | 7826 | A "The Laserfiche Server encountered an error when trying to attach the repository. Error 7826." Error Occurs When Attaching a Repository. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000844/a-the-laserfiche-server-encountered-an-error-when-trying-to-attach-the-repository-error-7826-error-occurs-when-attaching-a-repository- |
 | Laserfiche Server/Repository Server | 8000 | An "8000: Unknown error." Error Occurs When Logging in to a Repository. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000451/an-8000-unknown-error-error-occurs-when-logging-in-to-a-repository- |
 | Laserfiche Server/Repository Server | 9001 | An "Error encountered while confirming final disposition. See the error log for details. Entry not found. [9001]" Error Occurs When Performing Final Disposition On A Record Folder. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1013181/an-error-encountered-while-confirming-final-disposition-see-the-error-log-for-details-entry-not-found-9001-error-occurs-when-performing-final-disposition-on-a-record-folder- |
@@ -276,9 +278,13 @@ Support KB needs-review entries: 307
 | Quick Fields | QF-AN_IP2_UNHANDLED_EXCEPTION_IN_CDIB | An "IP2: Unhandled Exception in CDIBFilterImpl::RunEx" error occurs when using Barcode 9.1 in Quick Fields on Windows 10 | medium | support-knowledge-base | https://support.laserfiche.com/kb/1013781/an-ip2-unhandled-exception-in-cdibfilterimpl-runex-error-occurs-when-using-barcode-9-1-in-quick-fields-on-windows-10 |
 | Quick Fields | QF-CAN_QUICK_FIELD_SET_TO_SAVE_A_DOCU | Can quick field set to save a document even when the field has error? | low | answers-search | https://answers.laserfiche.com/questions/79327/Can-quick-field-set-to-save-a-document-even-when-the-field-has-error |
 | Quick Fields | QF-ISSUE_CONFIGURING_REAL_TIME_LOOKUP | Issue configuring Real Time Lookup when using a SQL connection string | medium | support-knowledge-base | https://support.laserfiche.com/kb/1014387/issue-configuring-real-time-lookup-when-using-a-sql-connection-string |
+| Quick Fields | QF-KNOWN_ISSUES_WITH_LASERFICHE_SERVE | Known Issues with Laserfiche Server 7.0.3. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000931/known-issues-with-laserfiche-server-7-0-3- |
+| Quick Fields | QF-KNOWN_ISSUES_WITH_THE_LASERFICHE_S | Known Issues with the Laserfiche Server 7.0.2. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000801/known-issues-with-the-laserfiche-server-7-0-2- |
+| Quick Fields | QF-OMNIPAGE_OCR_DOES_NOT_CORRECTLY_PR | OmniPage OCR Does Not Correctly Process Multi-Byte Western Languages. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011841/omnipage-ocr-does-not-correctly-process-multi-byte-western-languages- |
 | Quick Fields | QF-QUICK_FIELDS_FIELD_ERROR | Quick Fields - Field Error | low | answers-search | https://answers.laserfiche.com/questions/84180/Quick-Fields--Field-Error |
 | Quick Fields | QF-QUICK_FIELDS_TECHNICAL_SUPPORT_CHE | Quick Fields Technical Support Checklist. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1013993/quick-fields-technical-support-checklist- |
 | Quick Fields | QF-RELEASE_AND_HOTFIX_INFORMATION_FOR | Release and Hotfix Information for Laserfiche Quick Fields 11 | medium | support-knowledge-base | https://support.laserfiche.com/kb/1014432/release-and-hotfix-information-for-laserfiche-quick-fields-11 |
+| Quick Fields | QF-TEMPORARY_OCR_FILES_ARE_NOT_AUTOMA | Temporary OCR Files Are Not Automatically Removed When OCRing Color or Grayscale Images. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011840/temporary-ocr-files-are-not-automatically-removed-when-ocring-color-or-grayscale-images- |
 | Quick Fields | QF-USERS_MAY_SEE_AN_UNSPECIFIED_ERROR | Users may see an "Unspecified error" message when storing documents from Quick Fields to a Laserfiche Cloud Repository | medium | support-knowledge-base | https://support.laserfiche.com/kb/1014519/users-may-see-an-unspecified-error-message-when-storing-documents-from-quick-fields-to-a-laserfiche-cloud-repository |
 | Quick Fields | QF-WHILE_UPDATING_AN_EXISTING_RECORD_ | While Updating an Existing Record in Microsoft Access database via Laserfiche Workflow, Quick Fields or Laserfiche Forms, You May Get the Following Error: "Query 'query name' is co | medium | support-knowledge-base | https://support.laserfiche.com/kb/1014112/while-updating-an-existing-record-in-microsoft-access-database-via-laserfiche-workflow-quick-fields-or-laserfiche-forms-you-may-get-the-following-error-query-query-name-is-corrupt- |
 | Quick Fields | QF1000 | Quick fields server error Could not connect to the Quick Fields Server. [QF1000] Retry | low | answers-search | https://answers.laserfiche.com/questions/195805/Quick-fields-server-error-Could-not-connect-to-the-Quick-Fields-Server-QF1000-Retry |

@@ -1,7 +1,42 @@
 import { answersChromePromotedReviewedSources } from "./answersChromePromotions.js";
 import { supportChromePromotedReviewedSources } from "./supportChromePromotions.js";
+import { sourceTypeByUrl } from "./errors.js";
 
-export const reviewedSources = [
+const reviewStatusRank = {
+  curated: 1,
+  "curated-partial": 2,
+  "curated-unresolved": 3,
+  candidate: 4,
+  "cross-product": 5,
+  "not-actionable": 6,
+  "no-matching-posts": 7,
+};
+
+function dedupeReviewedSources(sources) {
+  const byUrl = new Map();
+  for (const source of sources) {
+    const existing = byUrl.get(source.url);
+    if (!existing) {
+      byUrl.set(source.url, source);
+      continue;
+    }
+
+    const preferred =
+      (reviewStatusRank[source.reviewStatus] ?? 99) < (reviewStatusRank[existing.reviewStatus] ?? 99)
+        ? source
+        : existing;
+    byUrl.set(source.url, {
+      ...preferred,
+      productTags: [...new Set([...(existing.productTags ?? []), ...(source.productTags ?? [])])],
+      extractedErrorCodes: [
+        ...new Set([...(existing.extractedErrorCodes ?? []), ...(source.extractedErrorCodes ?? [])]),
+      ],
+    });
+  }
+  return [...byUrl.values()];
+}
+
+export const reviewedSources = dedupeReviewedSources([
   ...answersChromePromotedReviewedSources,
   ...supportChromePromotedReviewedSources,
   {
@@ -9509,4 +9544,7 @@ export const reviewedSources = [
     extractedErrorCodes: ["INSTALLER-MOUNTED-ISO-DISK-ERROR"],
     reviewStatus: "curated",
   },
-];
+]).map((source) => ({
+  ...source,
+  sourceType: sourceTypeByUrl.get(source.url) ?? source.sourceType,
+}));
