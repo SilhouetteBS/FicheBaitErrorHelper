@@ -34,13 +34,15 @@ try {
   if (!firstVisitInstructionsVisible) throw new Error("First visit did not show the instructions pane.");
   await page.getByPlaceholder("Search code, message, symptom, product, or fix").fill("9030");
   await page.waitForURL(/q=9030/);
-  await page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ }).click();
+  const resultGroup = page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ });
+  if ((await resultGroup.getAttribute("aria-expanded")) !== "true") await resultGroup.click();
   await page.getByRole("button", { name: /9030 Maximum sessions or licensing limit reached/ }).click();
   await page.waitForURL(/error=/);
   await page.getByText("Likely Fixes").waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: desktopScreenshot, fullPage: false });
   const visible = await page.getByText("Likely Fixes").isVisible();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Back to results" }).waitFor({ state: "visible" });
   await page.screenshot({ path: mobileScreenshot, fullPage: false });
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await browser.close();

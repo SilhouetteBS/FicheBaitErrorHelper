@@ -1,6 +1,7 @@
 import { errorEntries, productOptions, sourcePriority, versionOptions } from "../src/data/errors.js";
 import { officialDocumentationErrorEntries } from "../src/data/officialDocumentationErrors.js";
 import { reviewedSources } from "../src/data/reviewedSources.js";
+import { validateSourceUrl } from "../src/data/sourcePolicy.js";
 
 const errors = [];
 const reviewedByUrl = new Map(reviewedSources.map((source) => [source.url, source]));
@@ -16,14 +17,6 @@ const ledgerUrls = new Set();
 
 function isIsoDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
-}
-
-function isHttpUrl(value) {
-  try {
-    return ["http:", "https:"].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
 }
 
 if (productOptions.some((product, index) => product !== sortedProducts[index])) {
@@ -65,7 +58,8 @@ for (const entry of errorEntries) {
       errors.push(`${entry.id} uses unknown source type ${source.sourceType}`);
     }
     if (!source.title) errors.push(`${entry.id} has a source without a title`);
-    if (!isHttpUrl(source.url)) errors.push(`${entry.id} has an invalid source URL ${source.url}`);
+    const sourceUrlValidation = validateSourceUrl(source.sourceType, source.url);
+    if (!sourceUrlValidation.valid) errors.push(`${entry.id} has an invalid source URL ${source.url}: ${sourceUrlValidation.reason}`);
     const reviewedSource = reviewedByUrl.get(source.url);
     if (!reviewedSource) {
       errors.push(`${entry.id} source ${source.url} is not in the reviewed-source ledger`);
@@ -103,7 +97,8 @@ for (const source of reviewedSources) {
     if (!source[field]) errors.push(`${source.id || "unknown reviewed source"} is missing ${field}`);
   }
   if (!sourcePriority[source.sourceType]) errors.push(`${source.id} uses unknown source type ${source.sourceType}`);
-  if (!isHttpUrl(source.url)) errors.push(`${source.id} has invalid URL ${source.url}`);
+  const sourceUrlValidation = validateSourceUrl(source.sourceType, source.url);
+  if (!sourceUrlValidation.valid) errors.push(`${source.id} has invalid URL ${source.url}: ${sourceUrlValidation.reason}`);
   if (!isIsoDate(source.reviewedDate)) errors.push(`${source.id} uses invalid reviewed date ${source.reviewedDate}`);
   if (!Array.isArray(source.productTags)) errors.push(`${source.id} must include productTags`);
   if (!Array.isArray(source.extractedErrorCodes)) errors.push(`${source.id} must include extractedErrorCodes`);

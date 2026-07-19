@@ -1,6 +1,6 @@
-# Research Workspace
+# Public Research Reports
 
-This folder contains source-review artifacts used to build the public FicheBait Error Helper catalog.
+This folder contains sanitized aggregate reports. Raw captures and partially reviewed research remain in the private research repository.
 
 ## Current Published Totals
 
@@ -16,6 +16,6 @@ This folder contains source-review artifacts used to build the public FicheBait 
 - `progress-report.md`: generated catalog coverage summary.
 - `quality-report.md`: generated validation queue summary.
 
-## Raw Support Search Artifacts
+## Private Research Artifacts
 
-Raw Support KB search captures are retained for traceability. The state file tracks visited KB IDs and open cursors so future searches do not repeat prior work.
+Raw Support KB search captures are retained privately for traceability. State files track visited KB IDs and open cursors so future searches do not repeat prior work.

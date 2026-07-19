@@ -1,15 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { reviewedSources } from "../src/data/reviewedSources.js";
+import { privateResearchPath } from "./research-paths.mjs";
 
 const today = new Date().toISOString().slice(0, 10);
-const resultsPath = path.join("research", "product-discovery-results.json");
+const resultsPath = privateResearchPath("product-discovery-results.json");
 const [, , productArg = "", targetArg = "25"] = process.argv;
 const requestedProduct = productArg.trim();
 const isAllProducts = !requestedProduct || requestedProduct.toLowerCase() === "all";
 const targetCount = Number.parseInt(targetArg, 10) || 25;
 const passSlug = isAllProducts ? `all-${targetCount}` : `${slugify(requestedProduct)}-${targetCount}`;
-const passPath = nextAvailablePassPath(path.join("research", `answers-product-pass-${today}-${passSlug}.json`));
+const passPath = nextAvailablePassPath(privateResearchPath(`answers-product-pass-${today}-${passSlug}.json`));
 
 const maxPagesPerQuery = targetCount > 25 ? 16 : 8;
 const requestTimeoutMs = 15000;

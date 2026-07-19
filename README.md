@@ -9,6 +9,9 @@ This project is not affiliated with or endorsed by Laserfiche. It is a community
 Laserfiche is a registered trademark of Compulink Management Center, Inc. Use of the mark follows the
 [Laserfiche trademark and brand guidelines](https://www.laserfiche.com/legal/trademark/).
 
+The MIT license applies to original software code only. See `CONTENT-NOTICE.md` for catalog and third-party content
+rights, attribution, and research-data handling.
+
 ## What It Does
 
 - Searches official Laserfiche documentation entries and reviewed Laserfiche Answers sources.

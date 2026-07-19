@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { privateResearchDir } from "./research-paths.mjs";
 
-const researchDir = "research";
+const researchDir = privateResearchDir;
 const outputPath = "src/data/supportChromePromotions.js";
 const reviewedSourcesPath = "src/data/reviewedSources.js";
 const batchPattern = /^support-chrome-search-batch-(\d{4}-\d{2}-\d{2})-\d+\.json$/;

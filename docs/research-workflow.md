@@ -1,6 +1,12 @@
 # Research Workflow
 
-This project publishes curated troubleshooting entries only. Raw or partially reviewed research should stay in `research/reviewed-sources.json` until it has enough evidence for `src/data/errors.js`.
+This project publishes curated troubleshooting entries and sanitized aggregate reports only. Raw or partially reviewed
+research must stay in the private `SilhouetteBS/FicheBaitErrorHelperResearch` repository until it has enough evidence
+for a sanitized promotion into `src/data/errors.js`.
+
+Set `FICHEBAIT_RESEARCH_DIR` to the private repository's `research` directory when running discovery and curation
+commands. Never copy authenticated page bodies, raw snippets, credentials, customer identifiers, or full logs into the
+public repository.
 
 ## Source Priority
 
@@ -66,7 +72,7 @@ The official Version 12 server-code pass is tracked separately in `research/answ
 
 Use `research/product-discovery-queue.json` for product-specific discovery outside the official server-code listing. Each queue item contains official documentation searches and Laserfiche Answers searches for one product.
 
-Use `research/product-discovery-results.json` for candidate signatures found during product discovery. A signature can be:
+Use `product-discovery-results.json` in the private research workspace for candidate signatures found during product discovery. A signature can be:
 
 - a numeric error code, such as `9357`
 - an exact UI or log message with no numeric code

@@ -2,8 +2,10 @@ import fs from "node:fs";
 
 import { errorEntries, productOptions } from "../src/data/errors.js";
 import { reviewedSources } from "../src/data/reviewedSources.js";
+import { privateResearchPath, publicResearchPath } from "./research-paths.mjs";
 
-const discoveryRows = JSON.parse(fs.readFileSync("research/product-discovery-results.json", "utf8"));
+const discoveryPath = privateResearchPath("product-discovery-results.json");
+const discoveryRows = fs.existsSync(discoveryPath) ? JSON.parse(fs.readFileSync(discoveryPath, "utf8")) : [];
 const reportDate = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Denver",
   year: "numeric",
@@ -95,5 +97,5 @@ const report = [
   "",
 ];
 
-fs.writeFileSync("research/progress-report.md", `${report.join("\n")}\n`);
+fs.writeFileSync(publicResearchPath("progress-report.md"), `${report.join("\n")}\n`);
 console.log(`Wrote research/progress-report.md with ${errorEntries.length} entries and ${reviewedSources.length} reviewed sources.`);

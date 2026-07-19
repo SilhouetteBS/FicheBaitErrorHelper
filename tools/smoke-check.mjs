@@ -5,6 +5,7 @@ import { extname, join, normalize, resolve } from "node:path";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { browserLaunchOptions } from "./browser-launch.mjs";
+import AxeBuilder from "@axe-core/playwright";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = resolve(rootDir, "dist");
@@ -55,7 +56,8 @@ try {
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}/FicheBaitErrorHelper/`;
   browser = await chromium.launch(browserLaunchOptions());
-  const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+  const context = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+  const page = await context.newPage();
   const consoleErrors = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
@@ -63,6 +65,11 @@ try {
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await expectVisible(page.getByText("Get started"), "First-visit instructions were not visible.");
+  const accessibilityResults = await new AxeBuilder({ page }).analyze();
+  const seriousAccessibilityIssues = accessibilityResults.violations.filter((issue) => ["serious", "critical"].includes(issue.impact));
+  if (seriousAccessibilityIssues.length) {
+    throw new Error(`Accessibility violations: ${seriousAccessibilityIssues.flatMap((issue) => issue.nodes.map((node) => `${issue.id} (${node.target.join(" ")})`)).join(", ")}`);
+  }
 
   await page.getByRole("button", { name: "How it works" }).click();
   await expectVisible(page.getByRole("heading", { name: "How It Works" }), "How It Works dialog did not open.");
@@ -96,12 +103,16 @@ try {
 
   await page.getByPlaceholder("Search code, message, symptom, product, or fix").fill("9030");
   await page.waitForURL(/q=9030/);
+  await page.waitForFunction(() => Number.parseInt(document.querySelector(".pane-heading h2")?.textContent ?? "", 10) <= 10);
   const numericResultText = await page.locator(".pane-heading h2").textContent();
   const numericResultCount = Number.parseInt(numericResultText, 10);
   if (!Number.isFinite(numericResultCount) || numericResultCount < 1 || numericResultCount > 10) {
     throw new Error(`Numeric search returned an implausible result count: ${numericResultText}`);
   }
-  await page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ }).click();
+  const resultGroup = page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ });
+  if ((await resultGroup.getAttribute("aria-expanded")) !== "true") {
+    throw new Error("An exact error-code search did not expand its matching product group.");
+  }
   await page.getByRole("button", { name: /9030 Maximum sessions or licensing limit reached/ }).click();
   await page.waitForURL(/error=/);
   await expectVisible(page.getByRole("button", { name: "Share" }), "Share action was not visible.");
@@ -111,11 +122,21 @@ try {
   if (!href?.includes("ISSUE_TEMPLATE") && !href?.includes("template=error-report.yml")) {
     throw new Error("Correction link does not point to the error-report issue template.");
   }
+  if (href.length > 1500) throw new Error(`Correction link is too long: ${href.length} characters.`);
+
+  await page.goBack();
+  await expectVisible(page.getByText("Get started"), "Browser Back did not clear the selected error.");
+  await page.goForward();
+  await expectVisible(page.getByText("Likely Fixes"), "Browser Forward did not restore the selected error.");
 
   await page.getByLabel("Product", { exact: true }).selectOption("Forms");
   await expectVisible(page.getByText("Get started"), "Filtering out the selected entry did not clear the detail pane.");
 
   await expectVisible(page.getByText("Reviewed Source Ledger"), "Reviewed Source Ledger was not visible.");
+  await page.getByRole("button", { name: "View full ledger" }).click();
+  await expectVisible(page.getByRole("navigation", { name: "Reviewed source pages" }), "Ledger pagination was not visible.");
+  const visibleLedgerRows = await page.locator(".ledger-row:not(.ledger-head)").count();
+  if (visibleLedgerRows > 50) throw new Error(`Ledger rendered ${visibleLedgerRows} rows on one page.`);
   const faviconStatus = await page.evaluate(() =>
     fetch("/FicheBaitErrorHelper/favicon.ico").then((response) => response.status),
   );
@@ -123,6 +144,13 @@ try {
   await page.goto(`${baseUrl}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
   await expectVisible(page.getByText("Likely Fixes"), "Direct error link did not hydrate its product detail module.");
   await page.setViewportSize({ width: 390, height: 844 });
+  const mobileBack = page.getByRole("button", { name: "Back to results" });
+  await expectVisible(mobileBack, "Mobile error detail did not provide a Back to results action.");
+  await mobileBack.click();
+  await expectVisible(page.getByLabel("Error results"), "Back to results did not restore mobile results.");
+  await page.getByText("Reviewed Source Ledger").scrollIntoViewIfNeeded();
+  const ledgerWidth = await page.locator(".ledger-panel").evaluate((element) => element.getBoundingClientRect().width);
+  if (ledgerWidth > 390) throw new Error(`Mobile ledger exceeds the viewport: ${ledgerWidth}px.`);
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await browser.close();
   browser = null;

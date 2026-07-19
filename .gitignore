@@ -5,3 +5,12 @@ npm-debug.log*
 playwright-report/
 test-results/
 src/data/generated/
+
+# Raw research captures are maintained in the private FicheBaitErrorHelperResearch repository.
+research/*
+!research/README.md
+!research/progress-report.md
+!research/quality-report.md
+!research/needs-review-report.md
+!research/support-kb-research-status.md
+!research/support-chrome-search-index.md

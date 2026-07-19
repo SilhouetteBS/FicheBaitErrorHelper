@@ -1,9 +1,8 @@
-import React, { useEffect, useId, useMemo, useState } from "react";
+import React, { lazy, Suspense, useDeferredValue, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   AlertTriangle,
   BookOpen,
-  Check,
   ChevronDown,
   ChevronRight,
   ExternalLink,
@@ -11,13 +10,9 @@ import {
   HelpCircle,
   Info,
   MessageSquare,
-  MessageSquarePlus,
   RefreshCw,
   Search,
-  Share2,
   ShieldAlert,
-  Stethoscope,
-  Wrench,
   X,
 } from "lucide-react";
 import {
@@ -30,9 +25,16 @@ import { loadCatalogData } from "./catalogLoader.js";
 import { InfoDialog } from "./components/InfoDialog.jsx";
 import { TooltipIcon } from "./components/TooltipIcon.jsx";
 import { normalize, normalizeCode, searchScore } from "./search.js";
+import {
+  fixStatusMetadata,
+  reviewStatusMetadata,
+  statusLabel,
+  validationStatusMetadata,
+} from "./statusMetadata.js";
 import "./styles.css";
 
 const allOption = "All";
+const ErrorDetail = lazy(() => import("./components/ErrorDetail.jsx").then((module) => ({ default: module.ErrorDetail })));
 const usageStorageKey = "fichebait-error-helper-usage";
 const defaultUsageStats = {
   searches: 0,
@@ -62,7 +64,7 @@ function displayDate(value) {
 }
 
 function sourceRank(entry) {
-  return Math.min(...entry.sources.map((source) => sourcePriority[source.sourceType] ?? 99));
+  return Math.min(...(entry.sources ?? []).map((source) => sourcePriority[source.sourceType] ?? 99), 99);
 }
 
 function confidenceLabel(value) {
@@ -77,40 +79,11 @@ function sourceTypeLabel(sourceType) {
 
 function fixStatusLabel(value) {
   if (value === allOption) return allOption;
-  const labels = {
-    "known-fix": "Known fix",
-    workaround: "Workaround",
-    "diagnostic-only": "Diagnostic only",
-    unresolved: "Unresolved",
-    "needs-review": "Needs review",
-  };
-  return labels[value] ?? labels["needs-review"];
+  return statusLabel(fixStatusMetadata, value, fixStatusMetadata["needs-review"].label);
 }
 
 function validationStatusLabel(value) {
-  const labels = {
-    "official-doc-baseline": "Official doc baseline",
-    "reviewed-diagnostic": "Reviewed diagnostic",
-    "source-research-needed": "Needs source research",
-  };
-  return labels[value] ?? "Not triaged";
-}
-
-function validationStatusDescription(value) {
-  const descriptions = {
-    "official-doc-baseline": "This error is listed in official documentation, but no public Answers fix has been attached yet.",
-    "reviewed-diagnostic": "Current sources were reviewed; keep this as diagnostic guidance unless stronger evidence is found.",
-    "source-research-needed": "The entry is documented for discovery, but it still needs deeper source research before promoting a fix.",
-  };
-  return descriptions[value] ?? "This entry has not been included in a validation triage pass yet.";
-}
-
-function candidateReviewSummary(entryId, sourceCandidateReviews) {
-  const reviews = Object.values(sourceCandidateReviews).filter((review) => review.entryId === entryId);
-  if (reviews.length === 0) return null;
-  const accepted = reviews.filter((review) => review.disposition.startsWith("accepted-")).length;
-  if (accepted > 0) return { label: "Candidate source found", className: "candidate-found", count: accepted };
-  return { label: "Candidate reviewed", className: "candidate-reviewed", count: reviews.length };
+  return statusLabel(validationStatusMetadata, value, "Not triaged");
 }
 
 function scenarioFilterLabel(value) {
@@ -177,9 +150,10 @@ function initialParam(name, fallback = allOption) {
 
 function setErrorUrl(entryId) {
   const url = new URL(window.location.href);
-  url.searchParams.set("error", entryId);
+  if (entryId) url.searchParams.set("error", entryId);
+  else url.searchParams.delete("error");
   url.hash = "";
-  window.history.replaceState({}, "", url);
+  window.history.pushState({}, "", url);
 }
 
 function errorShareUrl(entryId) {
@@ -187,25 +161,6 @@ function errorShareUrl(entryId) {
   url.searchParams.set("error", entryId);
   url.hash = "";
   return url.toString();
-}
-
-function correctionIssueUrl(entry) {
-  const params = new URLSearchParams({
-    template: "error-report.yml",
-    title: `[Error entry]: ${entry.code} - ${entry.product}`,
-    code: `${entry.code} - ${entry.message}`,
-    product: entry.product,
-    version: entry.versions.join(", "),
-    symptoms: [
-      `Entry ID: ${entry.id}`,
-      `Live URL: ${errorShareUrl(entry.id)}`,
-      "",
-      "Describe what is incorrect or missing:",
-    ].join("\n"),
-    source: entry.sources.map((sourceItem) => sourceItem.url).join("\n"),
-  });
-
-  return `https://github.com/SilhouetteBS/FicheBaitErrorHelper/issues/new?${params.toString()}`;
 }
 
 function setQueryParam(url, name, value, fallback = allOption) {
@@ -258,24 +213,17 @@ async function copyToClipboard(text) {
 }
 
 function reviewStatusLabel(value) {
-  const labels = {
-    curated: "Curated",
-    "curated-partial": "Curated partial",
-    "curated-unresolved": "Curated unresolved",
-    candidate: "Candidate",
-    "cross-product": "Cross-product",
-    "not-actionable": "Not actionable",
-    "no-matching-posts": "No matching posts",
-  };
-  return labels[value] ?? value;
+  return statusLabel(reviewStatusMetadata, value);
 }
 
 function sourceReviewStatusFor(sourceItem, reviewedSources) {
   if (!sourceItem?.url) return "curated";
+  if (reviewedSources instanceof Map) return reviewedSources.get(sourceItem.url) ?? "curated";
   return reviewedSources.find((reviewedSource) => reviewedSource?.url === sourceItem.url)?.reviewStatus ?? "curated";
 }
 
 function entryHasReviewStatus(entry, reviewStatus, reviewedSources) {
+  if (entry.reviewStatuses) return entry.reviewStatuses.includes(reviewStatus);
   return entry.sources.some((sourceItem) => sourceReviewStatusFor(sourceItem, reviewedSources) === reviewStatus);
 }
 
@@ -310,7 +258,7 @@ function activeFilterItems({
 }
 
 function App() {
-  const [query, setQuery] = useState(() => initialParam("q", ""));
+  const [query, setQuery] = useState(() => initialParam("q", "").slice(0, 200));
   const [product, setProduct] = useState(() => initialParam("product"));
   const [version, setVersion] = useState(() => initialParam("version"));
   const [source, setSource] = useState(() => initialParam("source"));
@@ -323,6 +271,7 @@ function App() {
   const [ledgerSource, setLedgerSource] = useState(() => initialParam("ledger"));
   const [reviewStatusFilter, setReviewStatusFilter] = useState(() => initialParam("review"));
   const [isLedgerExpanded, setIsLedgerExpanded] = useState(false);
+  const [ledgerPage, setLedgerPage] = useState(0);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [selectedId, setSelectedId] = useState(initialSelectedErrorId);
   const [selectedDetail, setSelectedDetail] = useState(null);
@@ -332,11 +281,26 @@ function App() {
   const [usageStats, setUsageStats] = useState(readUsageStats);
   const [catalog, setCatalog] = useState(null);
   const [catalogError, setCatalogError] = useState("");
+  const [reviewedSources, setReviewedSources] = useState(null);
+  const [sourceCandidateReviews, setSourceCandidateReviews] = useState({});
+  const ledgerRef = useRef(null);
 
   const errorEntries = catalog?.errorEntries ?? [];
-  const reviewedSources = catalog?.reviewedSources ?? [];
-  const sourceCandidateReviews = catalog?.sourceCandidateReviews ?? {};
+  const loadedReviewedSources = reviewedSources ?? [];
+  const reviewStatusByUrl = useMemo(
+    () => new Map(loadedReviewedSources.filter((item) => item.url).map((item) => [item.url, item.reviewStatus])),
+    [loadedReviewedSources],
+  );
+  const candidateReviewsByEntry = useMemo(() => {
+    const grouped = new Map();
+    for (const review of Object.values(sourceCandidateReviews)) {
+      if (!grouped.has(review.entryId)) grouped.set(review.entryId, []);
+      grouped.get(review.entryId).push(review);
+    }
+    return grouped;
+  }, [sourceCandidateReviews]);
   const isCatalogLoading = !catalog && !catalogError;
+  const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
     let isCurrent = true;
@@ -353,6 +317,20 @@ function App() {
       isCurrent = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!catalog || reviewedSources || !ledgerRef.current) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        catalog.loadReviewedSources().then(setReviewedSources).catch(() => setCatalogError("The source ledger could not be loaded."));
+        observer.disconnect();
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(ledgerRef.current);
+    return () => observer.disconnect();
+  }, [catalog, reviewedSources]);
 
   useEffect(() => {
     if (!catalog || !selectedId) return;
@@ -381,6 +359,12 @@ function App() {
   }, [catalog, selectedId]);
 
   useEffect(() => {
+    if (!catalog || !selectedId) return;
+    catalog.loadCandidateReviews().then(setSourceCandidateReviews).catch(() => {});
+    if (!reviewedSources) catalog.loadReviewedSources().then(setReviewedSources).catch(() => {});
+  }, [catalog, reviewedSources, selectedId]);
+
+  useEffect(() => {
     if (!notification) return undefined;
     const timeout = window.setTimeout(() => setNotification(""), 2600);
     return () => window.clearTimeout(timeout);
@@ -407,6 +391,27 @@ function App() {
   }, [query, product, version, source, confidence, fixStatus, scenarioFilter, researchFilter, validationFilter, sortBy, ledgerSource, reviewStatusFilter, selectedId]);
 
   useEffect(() => {
+    function restoreFromUrl() {
+      const url = new URL(window.location.href);
+      setQuery((url.searchParams.get("q") ?? "").slice(0, 200));
+      setProduct(url.searchParams.get("product") ?? allOption);
+      setVersion(url.searchParams.get("version") ?? allOption);
+      setSource(url.searchParams.get("source") ?? allOption);
+      setConfidence(url.searchParams.get("confidence") ?? allOption);
+      setFixStatus(url.searchParams.get("fix") ?? allOption);
+      setScenarioFilter(url.searchParams.get("scenarios") ?? allOption);
+      setResearchFilter(url.searchParams.get("research") ?? allOption);
+      setValidationFilter(url.searchParams.get("validation") ?? allOption);
+      setSortBy(url.searchParams.get("sort") ?? "relevance");
+      setLedgerSource(url.searchParams.get("ledger") ?? allOption);
+      setReviewStatusFilter(url.searchParams.get("review") ?? allOption);
+      setSelectedId(url.searchParams.get("error"));
+    }
+    window.addEventListener("popstate", restoreFromUrl);
+    return () => window.removeEventListener("popstate", restoreFromUrl);
+  }, []);
+
+  useEffect(() => {
     const term = query.trim();
     if (term.length < 2) return undefined;
     const timeout = window.setTimeout(() => {
@@ -424,7 +429,7 @@ function App() {
         ...sourceTypeOptions
           .filter((option) =>
             errorEntries.some((entry) => entry.sources.some((item) => item.sourceType === option.value)) ||
-            reviewedSources.some((item) => item.sourceType === option.value),
+            (catalog?.stats.sourceTypes ?? []).includes(option.value),
           )
           .map((option) => option.value),
       ],
@@ -436,11 +441,11 @@ function App() {
       validationStates: withAll(["source-research-needed", "reviewed-diagnostic", "official-doc-baseline"]),
       reviewStatuses: withAll(["curated", "curated-partial", "curated-unresolved", "cross-product", "not-actionable", "no-matching-posts"]),
     }),
-    [errorEntries, reviewedSources],
+    [catalog, errorEntries],
   );
 
   const filteredEntries = useMemo(() => {
-    const term = normalize(query);
+    const term = normalize(deferredQuery);
     return errorEntries
       .map((entry) => ({ entry, score: searchScore(entry, term) }))
       .filter(({ score }) => !term || score > 0)
@@ -464,20 +469,17 @@ function App() {
         return true;
       })
       .filter((entry) => validationFilter === allOption || entry.validationStatus === validationFilter)
-      .filter((entry) => reviewStatusFilter === allOption || entryHasReviewStatus(entry, reviewStatusFilter, reviewedSources))
+      .filter((entry) => reviewStatusFilter === allOption || entryHasReviewStatus(entry, reviewStatusFilter, loadedReviewedSources))
       .sort((a, b) => {
         if (sortBy === "code") return a.code.localeCompare(b.code, undefined, { numeric: true });
         if (sortBy === "confidence") return confidenceWeight(a.confidence) - confidenceWeight(b.confidence);
         if (sortBy === "product") return a.product.localeCompare(b.product) || a.code.localeCompare(b.code);
         return b.searchScore - a.searchScore || sourceRank(a) - sourceRank(b) || a.code.localeCompare(b.code, undefined, { numeric: true });
       });
-  }, [errorEntries, reviewedSources, query, product, version, source, confidence, fixStatus, scenarioFilter, researchFilter, validationFilter, reviewStatusFilter, sortBy]);
+  }, [deferredQuery, errorEntries, loadedReviewedSources, product, version, source, confidence, fixStatus, scenarioFilter, researchFilter, validationFilter, reviewStatusFilter, sortBy]);
 
   const selectedSummary = selectedId ? errorEntries.find((entry) => entry.id === selectedId) : null;
-  const latestSourceDate = useMemo(
-    () => reviewedSources.map((item) => item.reviewedDate).filter(Boolean).sort().at(-1),
-    [reviewedSources],
-  );
+  const latestSourceDate = catalog?.stats.latestSourceDate;
 
   useEffect(() => {
     if (!catalog || !selectedId) return;
@@ -535,6 +537,15 @@ function App() {
     setSelectedId(entryId);
     setErrorUrl(entryId);
     setUsageStats(recordUsageEvent("selections"));
+    if (window.matchMedia("(max-width: 720px)").matches) {
+      window.requestAnimationFrame(() => document.querySelector(".workspace")?.scrollIntoView({ behavior: "smooth" }));
+    }
+  }
+
+  function clearSelection() {
+    setSelectedId(null);
+    setSelectedDetail(null);
+    setErrorUrl(null);
   }
 
   async function shareEntry(entry) {
@@ -542,47 +553,6 @@ function App() {
     await copyToClipboard(shareUrl);
     setNotification(`Copied link for ${entry.code}.`);
     setUsageStats(recordUsageEvent("shares"));
-  }
-
-  function focusValidationQueue() {
-    setConfidence("Needs validation");
-    setResearchFilter("needs-fix-research");
-    setValidationFilter("source-research-needed");
-    setReviewStatusFilter(allOption);
-    setSortBy("confidence");
-    setSelectedId(null);
-    setIsMoreFiltersOpen(true);
-    setUsageStats(recordUsageEvent("filters"));
-  }
-
-  function focusGuidedFixes() {
-    setConfidence(allOption);
-    setResearchFilter("has-fix-guidance");
-    setFixStatus(allOption);
-    setReviewStatusFilter(allOption);
-    setSortBy("relevance");
-    setSelectedId(null);
-    setUsageStats(recordUsageEvent("filters"));
-  }
-
-  function focusScenarios() {
-    setScenarioFilter("has-scenarios");
-    setReviewStatusFilter(allOption);
-    setSelectedId(null);
-    setIsMoreFiltersOpen(true);
-    setUsageStats(recordUsageEvent("filters"));
-  }
-
-  function focusUnresolved() {
-    setConfidence(allOption);
-    setFixStatus("unresolved");
-    setResearchFilter("needs-fix-research");
-    setValidationFilter(allOption);
-    setReviewStatusFilter(allOption);
-    setSortBy("confidence");
-    setSelectedId(null);
-    setIsMoreFiltersOpen(true);
-    setUsageStats(recordUsageEvent("filters"));
   }
 
   function handleFixResearchFilter(value) {
@@ -613,12 +583,31 @@ function App() {
     [groupedEntries],
   );
 
-  const displayedReviewedSources = reviewedSources.filter(
+  useEffect(() => {
+    const normalizedQuery = normalize(query);
+    const queryCode = normalizeCode(query);
+    if (!normalizedQuery) return;
+    const exactProducts = errorEntries
+      .filter((entry) => normalize(entry.message) === normalizedQuery || (queryCode && normalizeCode(entry.code) === queryCode))
+      .map((entry) => entry.product);
+    if (exactProducts.length === 0) return;
+    setCollapsedGroups((current) => Object.fromEntries([...Object.entries(current), ...exactProducts.map((name) => [name, false])]));
+  }, [errorEntries, query]);
+
+  const displayedReviewedSources = loadedReviewedSources.filter(
     (sourceItem) =>
       (ledgerSource === allOption || sourceItem.sourceType === ledgerSource) &&
       (reviewStatusFilter === allOption || sourceItem.reviewStatus === reviewStatusFilter),
   );
-  const ledgerRows = isLedgerExpanded ? displayedReviewedSources : displayedReviewedSources.slice(0, 5);
+  const ledgerPageSize = 50;
+  const ledgerPageCount = Math.max(1, Math.ceil(displayedReviewedSources.length / ledgerPageSize));
+  const ledgerRows = isLedgerExpanded
+    ? displayedReviewedSources.slice(ledgerPage * ledgerPageSize, (ledgerPage + 1) * ledgerPageSize)
+    : displayedReviewedSources.slice(0, 5);
+
+  useEffect(() => {
+    setLedgerPage(0);
+  }, [ledgerSource, reviewStatusFilter]);
   const activeFilters = activeFilterItems({
     query,
     product,
@@ -665,7 +654,7 @@ function App() {
         <section className="notice helper-warning" aria-label="Important helper notice">
           <ShieldAlert aria-hidden="true" size={18} />
           <p>
-            This community research aid for Laserfiche® software is for read-only reporting, troubleshooting, and
+            This community research aid for Laserfiche software is for read-only reporting, troubleshooting, and
             education. It is not affiliated with or endorsed by Laserfiche. Manually modifying Laserfiche databases
             is unsupported and violates your support plan; validate changes in a test environment.{" "}
             <a href="https://github.com/SilhouetteBS/FicheBaitErrorHelper/blob/main/docs/known-limitations.md" rel="noreferrer" target="_blank">
@@ -680,6 +669,7 @@ function App() {
             <Search aria-hidden="true" size={20} />
             <input
               value={query}
+              maxLength={200}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search code, message, symptom, product, or fix"
               type="search"
@@ -808,33 +798,7 @@ function App() {
           </section>
         )}
 
-        <section className="quality-panel" aria-label="Research and validation shortcuts">
-          <div>
-            <span className="selected-label">Research focus</span>
-            <h2>Improve trust by validating uncertain entries.</h2>
-          </div>
-          <button type="button" onClick={focusValidationQueue}>
-            <strong>{qualitySummary.needsSourceResearch}</strong>
-            <span>Need source research</span>
-          </button>
-          <button type="button" onClick={focusGuidedFixes}>
-            <strong>{qualitySummary.hasGuidance}</strong>
-            <span>Have fix guidance</span>
-          </button>
-          <button type="button" onClick={focusScenarios}>
-            <strong>{qualitySummary.scenarioEntries}</strong>
-            <span>Multiple scenarios</span>
-          </button>
-          <button type="button" onClick={focusUnresolved}>
-            <strong>{qualitySummary.unresolvedEntries}</strong>
-            <span>Needs review</span>
-          </button>
-          <span className="quality-note">
-            {qualitySummary.lowConfidence} low-confidence entries remain visible for discovery; {qualitySummary.hasGuidance} entries have a known fix or workaround.
-          </span>
-        </section>
-
-      <section className="workspace">
+      <section className={`workspace ${selectedId ? "has-selection" : ""}`}>
         <aside className="results-pane" aria-label="Error results">
           <div className="pane-heading">
             <div>
@@ -916,10 +880,8 @@ function App() {
                         <span className="code">{entry.code}</span>
                         <span>
                           <strong>{entry.message}</strong>
-                          <small>{entry.summary}</small>
                         </span>
                         <span className="result-badges">
-                          <CandidateStatusBadge entryId={entry.id} sourceCandidateReviews={sourceCandidateReviews} />
                           {scenarioCount(entry) > 0 && <span className="scenario-count">{scenarioCount(entry)} scenarios</span>}
                           <FixStatusBadge value={fixStatusValue(entry)} />
                           <ConfidenceBadge value={entry.confidence} />
@@ -935,14 +897,17 @@ function App() {
         </aside>
 
         {selectedDetail ? (
-          <ErrorDetail
-            entry={selectedDetail}
-            allEntries={errorEntries}
-            reviewedSources={reviewedSources}
-            sourceCandidateReviews={sourceCandidateReviews}
-            onSelect={selectEntry}
-            onShare={shareEntry}
-          />
+          <Suspense fallback={<article className="detail-pane instructions-pane"><div className="empty-state"><RefreshCw aria-hidden="true" size={22} /><p>Loading troubleshooting details.</p></div></article>}>
+            <ErrorDetail
+              entry={selectedDetail}
+              allEntries={errorEntries}
+              reviewedSources={reviewStatusByUrl}
+              sourceCandidateReviews={candidateReviewsByEntry}
+              onSelect={selectEntry}
+              onShare={shareEntry}
+              onBack={clearSelection}
+            />
+          </Suspense>
         ) : selectedSummary ? (
           <article className="detail-pane instructions-pane" aria-live="polite">
             <div className="empty-state">
@@ -955,11 +920,11 @@ function App() {
         )}
       </section>
 
-      <section className="ledger-panel" aria-label="Reviewed source ledger">
+      <section className="ledger-panel" aria-label="Reviewed source ledger" ref={ledgerRef}>
         <div className="ledger-heading">
           <div>
             <h2>Reviewed Source Ledger</h2>
-            <span>{reviewedSources.length} sources</span>
+            <span>{catalog?.stats.reviewedSourceCount ?? 0} sources</span>
           </div>
           <div className="ledger-actions">
             <span>Showing:</span>
@@ -991,6 +956,11 @@ function App() {
             </div>
           </div>
           <div role="rowgroup">
+            {!reviewedSources && (
+              <div className="ledger-row ledger-loading" role="row">
+                <span role="cell">Loading reviewed sources...</span>
+              </div>
+            )}
             {ledgerRows.map((sourceItem) => (
               <div className="ledger-row" key={sourceItem.id} role="row">
                 <span className="ledger-source-name" role="cell">
@@ -1010,6 +980,17 @@ function App() {
             ))}
           </div>
         </div>
+        {isLedgerExpanded && displayedReviewedSources.length > ledgerPageSize && (
+          <nav className="ledger-pagination" aria-label="Reviewed source pages">
+            <button disabled={ledgerPage === 0} onClick={() => setLedgerPage((page) => Math.max(0, page - 1))} type="button">
+              Previous
+            </button>
+            <span>Page {ledgerPage + 1} of {ledgerPageCount}</span>
+            <button disabled={ledgerPage + 1 >= ledgerPageCount} onClick={() => setLedgerPage((page) => Math.min(ledgerPageCount - 1, page + 1))} type="button">
+              Next
+            </button>
+          </nav>
+        )}
       </section>
       </main>
       {infoDialog && (
@@ -1066,24 +1047,6 @@ function SourceTypeIcon({ sourceType }) {
   return <Icon aria-hidden="true" size={17} />;
 }
 
-function SourceBadge({ sourceType }) {
-  const labels = {
-    "official-docs": "Official Docs",
-    "support-knowledge-base": "Support Knowledge Base",
-    "answers-laserfiche-employee": "Answers - Laserfiche Employee",
-    "answers-community-confirmed": "Answers - Community Confirmed",
-    "answers-community": "Answers - Community",
-  };
-  return <span className={`source-badge ${sourceType}`}>{labels[sourceType] ?? sourceType}</span>;
-}
-
-function CandidateStatusBadge({ entryId, sourceCandidateReviews }) {
-  const summary = candidateReviewSummary(entryId, sourceCandidateReviews);
-  if (!summary) return null;
-
-  return <span className={`candidate-status ${summary.className}`}>{summary.label}</span>;
-}
-
 function InstructionsPane() {
   return (
     <article className="detail-pane instructions-pane">
@@ -1121,270 +1084,7 @@ function InstructionsPane() {
   );
 }
 
-function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidateReviews, onSelect, onShare }) {
-  const candidateSummary = candidateReviewSummary(entry.id, sourceCandidateReviews);
-  const sameCodeEntries = allEntries
-    .filter((candidate) => candidate.id !== entry.id && normalizeCode(candidate.code) === normalizeCode(entry.code))
-    .sort((a, b) => a.product.localeCompare(b.product) || fixStatusValue(a).localeCompare(fixStatusValue(b)) || a.message.localeCompare(b.message))
-    .slice(0, 8);
-
-  return (
-    <article className="detail-pane">
-      <div className="detail-main">
-        <div className="detail-header">
-          <div className="detail-title-block">
-            <span className="selected-label">Selected error</span>
-            {entry.scenarios?.length > 0 && <span className="scenario-count detail-scenario-count">{entry.scenarios.length} scenarios</span>}
-            {candidateSummary && (
-              <span className={`candidate-status ${candidateSummary.className}`}>
-                {candidateSummary.label}
-                <TooltipIcon text="A related Laserfiche Answers source was reviewed for this entry. Accepted candidates may add scenario-specific fixes; reviewed candidates may simply rule out a source." />
-              </span>
-            )}
-            <h2>{entry.code}</h2>
-          </div>
-          <div className="detail-actions">
-            <button onClick={() => onShare(entry)} type="button">
-              <Share2 aria-hidden="true" size={17} />
-              Share
-            </button>
-            <a href={correctionIssueUrl(entry)} rel="noreferrer" target="_blank">
-              <MessageSquarePlus aria-hidden="true" size={20} />
-              Report Correction
-            </a>
-          </div>
-        </div>
-        <p className="error-description">{entry.message}</p>
-
-        <div className="meta-strip">
-          <span>
-            <strong>Product</strong>
-            {entry.product}
-          </span>
-          <span>
-            <strong>Versions</strong>
-            {entry.versions.join(", ")}
-          </span>
-          <span>
-            <strong>Last Reviewed</strong>
-            {entry.reviewedDate}
-          </span>
-        </div>
-
-        <DetailSection title="Symptoms" icon={Stethoscope}>
-          <ul>
-            {entry.symptoms.map((symptom) => (
-              <li key={symptom}>{symptom}</li>
-            ))}
-          </ul>
-        </DetailSection>
-
-        <DetailSection
-          title="Likely Fixes"
-          icon={Wrench}
-          tooltip="These are source-backed or diagnostic next steps. Validate them in a test or maintenance window before changing production."
-        >
-          <ol>
-            {entry.likelyFixes.map((fix) => (
-              <li key={fix}>{fix}</li>
-            ))}
-          </ol>
-        </DetailSection>
-
-        {entry.scenarios?.length > 0 && (
-          <DetailSection title="Possible Scenarios">
-            <div className="scenario-list">
-              {entry.scenarios.map((scenario) => (
-                <section className="scenario-card" key={scenario.title}>
-                  <div className="scenario-heading">
-                    <div>
-                      <h4>{scenario.title}</h4>
-                      {scenario.summary && <p>{scenario.summary}</p>}
-                    </div>
-                    {scenario.versions?.length > 0 && (
-                      <span className="scenario-versions">{scenario.versions.join(", ")}</span>
-                    )}
-                  </div>
-                  <ScenarioList title="Symptoms" items={scenario.symptoms} />
-                  <ScenarioList title="Likely Causes" items={scenario.causes} />
-                  <ScenarioList title="Fixes / Next Steps" items={scenario.fixes} ordered />
-                  {scenario.sourceUrls?.length > 0 && (
-                    <div className="scenario-sources">
-                      <strong>Scenario sources</strong>
-                      <ul>
-                        {scenario.sourceUrls.map((url) => {
-                          const sourceItem = entry.sources.find((source) => source.url === url);
-                          return (
-                            <li key={url}>
-                              {sourceItem ? (
-                                <a href={url} rel="noreferrer" target="_blank">
-                                  {sourceItem.title}
-                                </a>
-                              ) : (
-                                <a href={url} rel="noreferrer" target="_blank">
-                                  {url}
-                                </a>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  )}
-                </section>
-              ))}
-            </div>
-          </DetailSection>
-        )}
-
-      </div>
-
-      <aside className="detail-sidebar" aria-label="Evidence and source details">
-        <section className="side-card">
-          <h3 className="with-tooltip">
-            Source Confidence
-            <TooltipIcon text="Confidence is based on source authority, whether a Laserfiche employee replied, and whether the fix was confirmed." />
-          </h3>
-          <ConfidenceBadge value={entry.confidence} />
-          <p>{entry.summary}</p>
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">
-            Fix Status
-            <TooltipIcon text="Known fix means a source confirms a fix. Workaround means source-backed remediation exists but may not be permanent. Diagnostic only and unresolved entries are useful for discovery but need more evidence." />
-          </h3>
-          <FixStatusBadge value={fixStatusValue(entry)} />
-          <p>
-            {fixStatusValue(entry) === "known-fix" &&
-              "A source-backed fix is documented for at least one matching scenario."}
-            {fixStatusValue(entry) === "workaround" &&
-              "A source-backed workaround is documented, but it may not be a permanent product fix."}
-            {fixStatusValue(entry) === "diagnostic-only" &&
-              "Sources provide troubleshooting direction, but no single confirmed fix is documented."}
-            {fixStatusValue(entry) === "unresolved" &&
-              "The error is documented, but no confirmed public fix has been identified yet."}
-            {fixStatusValue(entry) === "needs-review" &&
-              "This entry needs additional source review before a fix status can be assigned."}
-          </p>
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">
-            Validation Status
-            <TooltipIcon text="Validation status tracks research maturity for this helper. It does not mean the Laserfiche error itself is invalid or unsupported." />
-          </h3>
-          <span className={`validation-status ${entry.validationStatus ?? "not-triaged"}`}>
-            {validationStatusLabel(entry.validationStatus)}
-          </span>
-          <p>{validationStatusDescription(entry.validationStatus)}</p>
-          {candidateSummary && (
-            <p>
-              {candidateSummary.count} reviewed candidate source{candidateSummary.count === 1 ? "" : "s"} matched this entry.
-            </p>
-          )}
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">
-            Source Priority
-            <TooltipIcon text="Official docs rank first, Laserfiche employee Answers posts rank next, and community-confirmed sources rank after that." />
-          </h3>
-          <ol className="priority-list">
-            {[...entry.sources]
-              .sort((a, b) => (sourcePriority[a.sourceType] ?? 99) - (sourcePriority[b.sourceType] ?? 99))
-              .map((sourceItem) => (
-                <li key={`${sourceItem.sourceType}-${sourceItem.title}`}>
-                  <span>{sourceTypeLabel(sourceItem.sourceType)}</span>
-                  <span className="check-dot">
-                    <Check aria-hidden="true" size={11} strokeWidth={3.5} />
-                  </span>
-                </li>
-              ))}
-          </ol>
-        </section>
-        <section className="side-card">
-          <h3>Links to Sources</h3>
-          <div className="source-list">
-            {entry.sources.map((sourceItem, index) => (
-              <a
-                className="source-card"
-                href={sourceItem.url}
-                key={`${sourceItem.sourceType}-${sourceItem.url}-${index}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <span className="source-card-content">
-                  <span>{sourceItem.title}</span>
-                  <span className="source-card-meta">
-                    <SourceBadge sourceType={sourceItem.sourceType} />
-                    <ReviewStatusBadge value={sourceReviewStatusFor(sourceItem, reviewedSources)} />
-                  </span>
-                </span>
-                <ExternalLink aria-hidden="true" size={16} />
-              </a>
-            ))}
-          </div>
-        </section>
-        {sameCodeEntries.length > 0 && (
-          <section className="side-card">
-            <h3 className="with-tooltip">
-              Same Code, Other Contexts
-              <TooltipIcon text="The same numeric or product code can have different causes and fixes depending on product, version, and source context." />
-            </h3>
-            <div className="same-code-list">
-              {sameCodeEntries.map((relatedEntry) => (
-                <button key={relatedEntry.id} onClick={() => onSelect(relatedEntry.id)} type="button">
-                  <span>
-                    <strong>{relatedEntry.product}</strong>
-                    {relatedEntry.message}
-                  </span>
-                  <FixStatusBadge value={fixStatusValue(relatedEntry)} />
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-        {entry.notes && (
-          <div className="caution">
-            <AlertTriangle aria-hidden="true" size={18} />
-            <p>{entry.notes}</p>
-          </div>
-        )}
-      </aside>
-    </article>
-  );
-}
-
-function DetailSection({ title, children, icon: Icon = BookOpen, tooltip }) {
-  return (
-    <section className="detail-section">
-      <div className="section-label">
-        <Icon aria-hidden="true" size={17} />
-        <h3>{title}</h3>
-        {tooltip && <TooltipIcon text={tooltip} />}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function ScenarioList({ title, items = [], ordered = false }) {
-  if (!items.length) return null;
-
-  const ListTag = ordered ? "ol" : "ul";
-
-  return (
-    <div className="scenario-block">
-      <strong>{title}</strong>
-      <ListTag>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ListTag>
-    </div>
-  );
-}
-
 const rootElement = document.getElementById("root");
 const appRoot = window.__ficheBaitErrorHelperRoot ?? createRoot(rootElement);
 window.__ficheBaitErrorHelperRoot = appRoot;
 appRoot.render(<App />);
-

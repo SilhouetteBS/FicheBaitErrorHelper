@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import path from "node:path";
+import { privateResearchDir } from "./research-paths.mjs";
 
 const queuePath = process.argv[2] ?? latestQueuePath();
 const outputPath = "src/data/answersChromePromotions.js";
@@ -37,12 +39,12 @@ function readJson(path) {
 
 function latestQueuePath() {
   const candidates = fs
-    .readdirSync("research", { withFileTypes: true })
+    .readdirSync(privateResearchDir, { withFileTypes: true })
     .filter(
       (entry) =>
         entry.isFile() && /^answers-chrome-promotion-queue-\d{4}-\d{2}-\d{2}\.json$/.test(entry.name),
     )
-    .map((entry) => `research/${entry.name}`)
+    .map((entry) => path.join(privateResearchDir, entry.name))
     .sort();
   if (candidates.length === 0) throw new Error("No Answers Chrome promotion queue was found.");
   return candidates.at(-1);

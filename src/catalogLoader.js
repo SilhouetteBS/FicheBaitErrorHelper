@@ -1,12 +1,13 @@
 export async function loadCatalogData() {
-  const [indexModule, sourcesModule, manifestModule, candidateReviewsModule] = await Promise.all([
+  const [indexModule, manifestModule, statsModule] = await Promise.all([
     import("./data/generated/catalogIndex.js"),
-    import("./data/generated/reviewedSources.js"),
     import("./data/generated/catalogManifest.js"),
-    import("./data/sourceCandidateReviews.js"),
+    import("./data/generated/catalogStats.js"),
   ]);
 
   const productCache = new Map();
+  let reviewedSourcesPromise;
+  let candidateReviewsPromise;
 
   async function loadProduct(product) {
     if (!product) return [];
@@ -20,8 +21,15 @@ export async function loadCatalogData() {
 
   return {
     errorEntries: indexModule.catalogIndex,
-    reviewedSources: sourcesModule.reviewedSources,
-    sourceCandidateReviews: candidateReviewsModule.sourceCandidateReviews,
+    stats: statsModule.catalogStats,
+    loadReviewedSources() {
+      reviewedSourcesPromise ??= import("./data/generated/reviewedSources.js").then((module) => module.reviewedSources);
+      return reviewedSourcesPromise;
+    },
+    loadCandidateReviews() {
+      candidateReviewsPromise ??= import("./data/sourceCandidateReviews.js").then((module) => module.sourceCandidateReviews);
+      return candidateReviewsPromise;
+    },
     async loadEntry(entryId) {
       const product = indexModule.catalogIndex.find((entry) => entry.id === entryId)?.product;
       const entries = await loadProduct(product);

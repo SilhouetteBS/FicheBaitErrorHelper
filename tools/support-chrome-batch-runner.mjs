@@ -2,9 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 const cwd = process.cwd();
+const researchDir = process.env.FICHEBAIT_RESEARCH_DIR ? path.resolve(process.env.FICHEBAIT_RESEARCH_DIR) : path.join(cwd, "research");
 const today = process.env.RESEARCH_DATE ?? new Date().toISOString().slice(0, 10);
-const statePath = path.join(cwd, "research", `support-chrome-search-state-${today}.json`);
-const logPath = path.join(cwd, "research", "support-kb-review-log.json");
+const statePath = path.join(researchDir, `support-chrome-search-state-${today}.json`);
+const logPath = path.join(researchDir, "support-kb-review-log.json");
 const reviewedSourcesPath = path.join(cwd, "src", "data", "reviewedSources.js");
 
 const queries = [
@@ -119,8 +120,8 @@ function supportSourceIds() {
   for (const row of log.reviewedResults ?? []) {
     if (row.kbId) ids.add(String(row.kbId));
   }
-  for (const name of fs.readdirSync(path.join(cwd, "research")).filter((file) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(file))) {
-    const historicalState = readJson(path.join(cwd, "research", name), {});
+  for (const name of fs.readdirSync(researchDir).filter((file) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(file))) {
+    const historicalState = readJson(path.join(researchDir, name), {});
     for (const id of historicalState.visitedKbIds ?? []) ids.add(String(id));
   }
 
@@ -136,11 +137,11 @@ function supportSourceIds() {
 
 function latestHistoricalState() {
   const candidates = fs
-    .readdirSync(path.join(cwd, "research"))
+    .readdirSync(researchDir)
     .filter((file) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(file))
-    .filter((file) => path.join(cwd, "research", file) !== statePath)
+    .filter((file) => path.join(researchDir, file) !== statePath)
     .sort();
-  return candidates.length > 0 ? readJson(path.join(cwd, "research", candidates.at(-1)), {}) : {};
+  return candidates.length > 0 ? readJson(path.join(researchDir, candidates.at(-1)), {}) : {};
 }
 
 function kbIdFromUrl(url) {
@@ -337,10 +338,10 @@ export async function runSupportChromeBatch(tab, batchSize = 25, maxPagesPerRun 
   const batchNumber = canAppendToLastBatch ? lastBatch.batchNumber : (state.batches.length || 0) + 1;
   const batchPath = canAppendToLastBatch
     ? path.join(cwd, lastBatch.batchPath)
-    : path.join(cwd, "research", `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.json`);
+    : path.join(researchDir, `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.json`);
   const mdPath = canAppendToLastBatch
     ? path.join(cwd, lastBatch.mdPath)
-    : path.join(cwd, "research", `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.md`);
+    : path.join(researchDir, `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.md`);
   const batch = canAppendToLastBatch ? readJson(batchPath, { rows: [] }).rows ?? [] : [];
   const startingCount = batch.length;
   const cursor = state.cursor || { queryIndex: 0, page: 1 };
@@ -472,10 +473,10 @@ export async function runSupportChromeQueryBatch(tab, query = "error", batchSize
   const batchNumber = canAppendToLastBatch ? lastBatch.batchNumber : (state.batches.length || 0) + 1;
   const batchPath = canAppendToLastBatch
     ? path.join(cwd, lastBatch.batchPath)
-    : path.join(cwd, "research", `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.json`);
+    : path.join(researchDir, `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.json`);
   const mdPath = canAppendToLastBatch
     ? path.join(cwd, lastBatch.mdPath)
-    : path.join(cwd, "research", `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.md`);
+    : path.join(researchDir, `support-chrome-search-batch-${today}-${String(batchNumber).padStart(2, "0")}.md`);
   const batch = canAppendToLastBatch ? readJson(batchPath, { rows: [] }).rows ?? [] : [];
   const startingCount = batch.length;
   let pagesChecked = 0;

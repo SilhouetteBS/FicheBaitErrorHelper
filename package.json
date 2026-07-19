@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "homepage": "https://silhouettebs.github.io/FicheBaitErrorHelper/",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -29,19 +32,21 @@
     "pretest": "npm run generate:catalog",
     "test": "node tools/run-tests.mjs",
     "lint:data": "node tools/validate-data.mjs",
+    "lint:public": "node tools/validate-public-content.mjs",
     "lint:launch": "node tools/verify-launch-readiness.mjs",
     "smoke": "node tools/smoke-check.mjs",
     "render:check": "node tools/render-check.mjs",
-    "verify:launch": "npm run test && npm run lint:data && npm run lint:launch && npm run quality && npm run progress && npm run housekeeping && npm run build && npm run smoke && npm run render:check"
+    "verify:launch": "npm run test && npm run lint:data && npm run lint:public && npm run lint:launch && npm run quality && npm run progress && npm run housekeeping && npm run build && npm run smoke && npm run render:check"
   },
   "dependencies": {
-    "lucide-react": "^1.24.0",
+    "lucide-react": "^1.25.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@vitejs/plugin-react": "^6.0.3",
     "playwright": "^1.54.0",
-    "vite": "^8.1.4"
+    "vite": "^8.1.5"
   }
 }

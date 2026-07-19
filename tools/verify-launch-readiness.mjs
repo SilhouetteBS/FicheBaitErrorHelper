@@ -8,6 +8,7 @@ import { reviewedSources } from "../src/data/reviewedSources.js";
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const requiredFiles = [
   "LICENSE",
+  "CONTENT-NOTICE.md",
   "CONTRIBUTING.md",
   "CODE_OF_CONDUCT.md",
   "SECURITY.md",

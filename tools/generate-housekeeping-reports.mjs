@@ -6,14 +6,16 @@ import {
   supportChromePromotedErrorEntries,
   supportChromeSourceCurationQueue,
 } from "../src/data/supportChromePromotions.js";
+import { privateResearchDir, publicResearchDir } from "./research-paths.mjs";
 
-const researchDir = "research";
+const researchDir = privateResearchDir;
+const reportDir = publicResearchDir;
 const stateFiles = fs
   .readdirSync(researchDir)
   .filter((name) => /^support-chrome-search-state-\d{4}-\d{2}-\d{2}\.json$/.test(name))
   .sort()
   .map((name) => path.join(researchDir, name));
-const indexPath = path.join(researchDir, "support-chrome-search-index.md");
+const indexPath = path.join(reportDir, "support-chrome-search-index.md");
 
 function readJson(file, fallback) {
   try {
@@ -193,11 +195,11 @@ const supportStatus = [
 ].join("\n");
 
 const supportBatchIndex = [
-  "# Support KB Raw Batch Index",
+  "# Support KB Research Batch Summary",
   "",
   `Generated: ${new Date().toISOString()}`,
   "",
-  "This index summarizes the raw Support KB search batches so the large JSON captures can be audited without opening each file.",
+  "This sanitized index summarizes private Support KB search batches without publishing captured page content.",
   "",
   `Total captured batch files: ${batchRows.length}`,
   `Total captured rows: ${batchRows.reduce((sum, row) => sum + row.rows, 0)}`,
@@ -208,16 +210,14 @@ const supportBatchIndex = [
     { label: "Rows", value: (row) => row.rows },
     { label: "Queries", value: (row) => row.queries },
     { label: "Top Product Hints", value: (row) => row.products },
-    { label: "JSON", value: (row) => row.json },
-    { label: "Markdown", value: (row) => row.markdown },
   ]),
   "",
 ].join("\n");
 
 const readme = [
-  "# Research Workspace",
+  "# Public Research Reports",
   "",
-  "This folder contains source-review artifacts used to build the public FicheBait Error Helper catalog.",
+  "This folder contains sanitized aggregate reports. Raw captures and partially reviewed research remain in the private research repository.",
   "",
   "## Current Published Totals",
   "",
@@ -233,19 +233,19 @@ const readme = [
   "- `progress-report.md`: generated catalog coverage summary.",
   "- `quality-report.md`: generated validation queue summary.",
   "",
-  "## Raw Support Search Artifacts",
+  "## Private Research Artifacts",
   "",
-  "Raw Support KB search captures are retained for traceability. The state file tracks visited KB IDs and open cursors so future searches do not repeat prior work.",
+  "Raw Support KB search captures are retained privately for traceability. State files track visited KB IDs and open cursors so future searches do not repeat prior work.",
   "",
 ].join("\n");
 
-fs.writeFileSync(path.join(researchDir, "needs-review-report.md"), needsReviewReport);
-fs.writeFileSync(path.join(researchDir, "support-kb-research-status.md"), supportStatus);
+fs.writeFileSync(path.join(reportDir, "needs-review-report.md"), needsReviewReport);
+fs.writeFileSync(path.join(reportDir, "support-kb-research-status.md"), supportStatus);
 fs.writeFileSync(indexPath, supportBatchIndex);
-fs.writeFileSync(path.join(researchDir, "README.md"), readme);
+fs.writeFileSync(path.join(reportDir, "README.md"), readme);
 
-console.log(`Wrote ${path.join(researchDir, "needs-review-report.md")}`);
-console.log(`Wrote ${path.join(researchDir, "support-kb-research-status.md")}`);
+console.log(`Wrote ${path.join(reportDir, "needs-review-report.md")}`);
+console.log(`Wrote ${path.join(reportDir, "support-kb-research-status.md")}`);
 console.log(`Wrote ${indexPath}`);
-console.log(`Wrote ${path.join(researchDir, "README.md")}`);
+console.log(`Wrote ${path.join(reportDir, "README.md")}`);
 console.log(`Needs review: ${needsReview.length}; Support reference-only curation sources: ${sourceCurationRows.length}.`);
