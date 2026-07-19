@@ -20,7 +20,7 @@ try {
     },
   });
   const address = server.httpServer.address();
-  const url = `http://127.0.0.1:${address.port}/LaserficheErrorHelper/`;
+  const url = `http://127.0.0.1:${address.port}/FicheBaitErrorHelper/`;
   browser = await chromium.launch(browserLaunchOptions());
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const consoleErrors = [];

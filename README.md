@@ -1,10 +1,13 @@
-# FicheBait Laserfiche Error Helper
+# FicheBait Error Helper
 
-Interactive GitHub Pages app for browsing Laserfiche error codes, symptoms, source links, and curated troubleshooting guidance for Laserfiche self-hosted environments.
+Interactive GitHub Pages app for browsing error codes, symptoms, source links, and curated troubleshooting guidance for self-hosted Laserfiche® software environments.
 
-Live site: https://silhouettebs.github.io/LaserficheErrorHelper/
+Live site: https://silhouettebs.github.io/FicheBaitErrorHelper/
 
 This project is not affiliated with or endorsed by Laserfiche. It is a community research aid, not a replacement for Laserfiche Support, vendor documentation, or environment-specific change control.
+
+Laserfiche is a registered trademark of Compulink Management Center, Inc. Use of the mark follows the
+[Laserfiche trademark and brand guidelines](https://www.laserfiche.com/legal/trademark/).
 
 ## What It Does
 

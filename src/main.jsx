@@ -205,7 +205,7 @@ function correctionIssueUrl(entry) {
     source: entry.sources.map((sourceItem) => sourceItem.url).join("\n"),
   });
 
-  return `https://github.com/SilhouetteBS/LaserficheErrorHelper/issues/new?${params.toString()}`;
+  return `https://github.com/SilhouetteBS/FicheBaitErrorHelper/issues/new?${params.toString()}`;
 }
 
 function setQueryParam(url, name, value, fallback = allOption) {
@@ -644,7 +644,7 @@ function App() {
               width="168"
               height="36"
             />
-            <h1>Laserfiche Error Helper</h1>
+            <h1>Error Helper</h1>
           </div>
           <nav className="top-actions" aria-label="Utility links">
             <span>Sources reviewed through {displayDate(latestSourceDate)}</span>
@@ -665,10 +665,10 @@ function App() {
         <section className="notice helper-warning" aria-label="Important helper notice">
           <ShieldAlert aria-hidden="true" size={18} />
           <p>
-            This community research aid is for read-only reporting, troubleshooting, and education. It is not
-            affiliated with or endorsed by Laserfiche. Manually modifying Laserfiche databases is unsupported and
-            violates your support plan; validate changes in a test environment.{" "}
-            <a href="https://github.com/SilhouetteBS/LaserficheErrorHelper/blob/main/docs/known-limitations.md" rel="noreferrer" target="_blank">
+            This community research aid for Laserfiche® software is for read-only reporting, troubleshooting, and
+            education. It is not affiliated with or endorsed by Laserfiche. Manually modifying Laserfiche databases
+            is unsupported and violates your support plan; validate changes in a test environment.{" "}
+            <a href="https://github.com/SilhouetteBS/FicheBaitErrorHelper/blob/main/docs/known-limitations.md" rel="noreferrer" target="_blank">
               Known limitations
               <ExternalLink aria-hidden="true" size={13} />
             </a>

@@ -110,7 +110,7 @@ const repeatedCodeClusters = Object.values(
   .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code, undefined, { numeric: true }));
 
 const report = [
-  "# Laserfiche Error Helper Quality Report",
+  "# FicheBait Error Helper Quality Report",
   "",
   `Generated: ${reportDate}`,
   "",

@@ -12,7 +12,7 @@ Do not open a public issue with:
 - Private repository names, server names, hostnames, or customer-identifying log output.
 - Exploit details for an unpatched vulnerability.
 
-Instead, use [GitHub private vulnerability reporting](https://github.com/SilhouetteBS/LaserficheErrorHelper/security/advisories/new) before sharing details.
+Instead, use [GitHub private vulnerability reporting](https://github.com/SilhouetteBS/FicheBaitErrorHelper/security/advisories/new) before sharing details.
 
 ## Troubleshooting Guidance Safety
 

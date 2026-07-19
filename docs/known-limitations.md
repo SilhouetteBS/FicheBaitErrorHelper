@@ -31,3 +31,5 @@ These products need more source discovery before the catalog should be treated a
 Do not apply database changes, service-account changes, certificate changes, IIS hardening exceptions, or production configuration changes without normal backup and change-control procedures.
 
 This project is not affiliated with or endorsed by Laserfiche.
+
+Laserfiche is a registered trademark of Compulink Management Center, Inc.

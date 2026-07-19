@@ -1,6 +1,6 @@
 # Support KB Raw Batch Index
 
-Generated: 2026-07-10T19:02:23.054Z
+Generated: 2026-07-19T15:33:39.371Z
 
 This index summarizes the raw Support KB search batches so the large JSON captures can be audited without opening each file.
 

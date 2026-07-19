@@ -52,7 +52,7 @@ const sourceTypeCounts = countBy(reviewedSources, (source) => source.sourceType)
 const products = productRows();
 
 const report = [
-  "# Laserfiche Error Helper Progress Report",
+  "# FicheBait Error Helper Progress Report",
   "",
   `Generated: ${reportDate}`,
   "",

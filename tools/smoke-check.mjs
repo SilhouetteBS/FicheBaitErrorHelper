@@ -36,7 +36,7 @@ function startStaticServer() {
   return new Promise((resolveServer) => {
     const staticServer = createServer((request, response) => {
       const rawPath = decodeURIComponent(new URL(request.url, "http://127.0.0.1").pathname);
-      const sitePath = rawPath.replace(/^\/LaserficheErrorHelper\/?/, "");
+      const sitePath = rawPath.replace(/^\/FicheBaitErrorHelper\/?/, "");
       const relativePath = sitePath || "index.html";
       const resolvedPath = normalize(resolve(distDir, relativePath));
       const filePath = resolvedPath.startsWith(distDir) && existsSync(resolvedPath) ? resolvedPath : join(distDir, "index.html");
@@ -53,7 +53,7 @@ try {
   }
   server = await startStaticServer();
   const address = server.address();
-  const baseUrl = `http://127.0.0.1:${address.port}/LaserficheErrorHelper/`;
+  const baseUrl = `http://127.0.0.1:${address.port}/FicheBaitErrorHelper/`;
   browser = await chromium.launch(browserLaunchOptions());
   const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
   const consoleErrors = [];
@@ -117,7 +117,7 @@ try {
 
   await expectVisible(page.getByText("Reviewed Source Ledger"), "Reviewed Source Ledger was not visible.");
   const faviconStatus = await page.evaluate(() =>
-    fetch("/LaserficheErrorHelper/favicon.ico").then((response) => response.status),
+    fetch("/FicheBaitErrorHelper/favicon.ico").then((response) => response.status),
   );
   if (faviconStatus !== 200) throw new Error(`Favicon returned HTTP ${faviconStatus}.`);
   await page.goto(`${baseUrl}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });

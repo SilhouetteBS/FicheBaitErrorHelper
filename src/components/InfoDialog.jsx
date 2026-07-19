@@ -77,11 +77,12 @@ export function InfoDialog({ type, usageStats, qualitySummary, onClose }) {
         ) : (
           <div className="dialog-content">
             <p>
-              This helper is a self-hosted Laserfiche troubleshooting index for administrators and support teams.
+              FicheBait Error Helper is a troubleshooting index for administrators and support teams using self-hosted
+              Laserfiche® software.
               It is intended to speed up triage, not replace Laserfiche Support or environment-specific validation.
             </p>
             <p>
-              FicheBait Laserfiche Error Helper is not affiliated with or endorsed by Laserfiche. Source links,
+              FicheBait Error Helper is not affiliated with or endorsed by Laserfiche. Source links,
               confidence labels, and fix status labels are included so users can validate the original evidence
               before making production changes.
             </p>
@@ -89,6 +90,7 @@ export function InfoDialog({ type, usageStats, qualitySummary, onClose }) {
               Each entry links back to its reviewed sources so users can inspect the original documentation or
               Answers thread before changing a production system.
             </p>
+            <p>Laserfiche is a registered trademark of Compulink Management Center, Inc.</p>
             <p>
               Local usage counters on this browser: {usageStats.searches} searches, {usageStats.selections}
               selections, {usageStats.shares} shares, and {usageStats.filters} filter changes. These counters stay

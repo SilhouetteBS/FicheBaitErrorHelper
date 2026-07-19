@@ -1,6 +1,6 @@
 # Support KB Research Status
 
-Generated: 2026-07-10T19:02:23.053Z
+Generated: 2026-07-19T15:33:39.370Z
 
 Visited Support KB URLs: 542
 Promoted Support KB entries: 313

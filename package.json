@@ -1,9 +1,9 @@
 {
-  "name": "laserfiche-error-helper",
+  "name": "fichebait-error-helper",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "homepage": "https://silhouettebs.github.io/LaserficheErrorHelper/",
+  "homepage": "https://silhouettebs.github.io/FicheBaitErrorHelper/",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "predev": "npm run generate:catalog",

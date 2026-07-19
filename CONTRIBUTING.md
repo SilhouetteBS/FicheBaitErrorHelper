@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping improve the FicheBait Laserfiche Error Helper.
+Thank you for helping improve the FicheBait Error Helper.
 
 ## Contribution Model
 

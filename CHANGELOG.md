@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-07-19
+
+- Renamed the product to FicheBait Error Helper to keep the Laserfiche trademark out of a third-party product name.
+- Added descriptive trademark usage and ownership acknowledgment based on Laserfiche's published brand guidelines.
+- Updated the GitHub repository, Pages base path, contribution links, correction links, and release checks for the new public URL.
+
 ## 2026-07-10
 
 - Corrected numeric search relevance so error-code searches do not fuzzy-match unrelated digits.

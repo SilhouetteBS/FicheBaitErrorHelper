@@ -1,6 +1,6 @@
-# Laserfiche Error Helper Quality Report
+# FicheBait Error Helper Quality Report
 
-Generated: 2026-07-10
+Generated: 2026-07-19
 
 ## Summary
 

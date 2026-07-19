@@ -1,6 +1,6 @@
 # Launch Announcement Draft
 
-FicheBait Laserfiche Error Helper is a free community research index for Laserfiche administrators and support teams troubleshooting self-hosted Laserfiche systems.
+FicheBait Error Helper is a free community research index for administrators and support teams troubleshooting self-hosted Laserfiche® software systems.
 
 The helper lets users search Laserfiche error codes, messages, products, symptoms, source confidence, and reviewed source links. It combines official Laserfiche documentation with reviewed Laserfiche Answers posts, prioritizing official documentation and Laserfiche employee replies when available.
 
@@ -13,8 +13,10 @@ Current launch snapshot:
 
 This project is not affiliated with or endorsed by Laserfiche. It is a research aid, not a replacement for Laserfiche Support, internal change control, or environment-specific validation.
 
+Laserfiche is a registered trademark of Compulink Management Center, Inc.
+
 Community corrections are welcome through GitHub Issues. Please include product, version, exact error message, source links, and remove private information before posting.
 
-Live site: https://silhouettebs.github.io/LaserficheErrorHelper/
+Live site: https://silhouettebs.github.io/FicheBaitErrorHelper/
 
-Repository: https://github.com/SilhouetteBS/LaserficheErrorHelper
+Repository: https://github.com/SilhouetteBS/FicheBaitErrorHelper

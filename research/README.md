@@ -1,6 +1,6 @@
 # Research Workspace
 
-This folder contains source-review artifacts used to build the public Laserfiche Error Helper catalog.
+This folder contains source-review artifacts used to build the public FicheBait Error Helper catalog.
 
 ## Current Published Totals
 
