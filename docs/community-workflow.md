@@ -3,10 +3,13 @@
 ## How Users Should Contribute
 
 1. Search the live helper for the error code or message.
-2. Open the entry and use the correction link when the entry is incomplete or incorrect.
-3. Include product, version, symptom, source URL, and suggested correction.
-4. Remove private data, credentials, hostnames, repository names, license details, and customer-identifying information.
-5. Submit the report as a GitHub Issue. Do not open a pull request unless a maintainer asks for one.
+2. For an Answers-backed source or scenario, use `Share outcome on Answers` to generate a structured reply and open the original discussion.
+3. Include the product, exact version/build, outcome, and relevant sanitized context in the Answers reply.
+4. Use `Report Correction` for incorrect Error Helper metadata, an Answers post that cannot accept replies, or an entry without a relevant Answers discussion.
+5. Remove private data, credentials, hostnames, repository names, license details, and customer-identifying information.
+6. Do not open a pull request unless a maintainer asks for one.
+
+Answers replies are community evidence, not direct catalog edits. Maintainers review new and updated replies before changing source confidence, fix status, validation status, version applicability, or scenario guidance.
 
 ## Maintainer Review
 
@@ -44,6 +47,8 @@ Promote a fix only when the source supports:
 - Source authority.
 
 When the same code has multiple causes, add a scenario instead of replacing the existing guidance.
+
+Community reports that a fix worked can corroborate a scenario. Reports that a fix did not work should trigger scenario review rather than automatically invalidating the existing fix.
 
 ## Privacy Rules
 

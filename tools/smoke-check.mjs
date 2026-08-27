@@ -115,7 +115,7 @@ try {
   }
   await page.getByRole("button", { name: /9030 Maximum sessions or licensing limit reached/ }).click();
   await page.waitForURL(/error=/);
-  await expectVisible(page.getByRole("button", { name: "Share" }), "Share action was not visible.");
+  await expectVisible(page.getByRole("button", { name: "Share", exact: true }), "Share action was not visible.");
   const correctionLink = page.getByRole("link", { name: "Report Correction" });
   await expectVisible(correctionLink, "Report correction link was not visible.");
   const href = await correctionLink.getAttribute("href");
@@ -123,6 +123,22 @@ try {
     throw new Error("Correction link does not point to the error-report issue template.");
   }
   if (href.length > 1500) throw new Error(`Correction link is too long: ${href.length} characters.`);
+
+  const answersContribution = page.getByRole("button", { name: "Share outcome on Answers", exact: true }).first();
+  await expectVisible(answersContribution, "Answers contribution action was not visible for an Answers source.");
+  await answersContribution.click();
+  const answersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
+  await expectVisible(answersDialog, "Answers contribution dialog did not open.");
+  await answersDialog.getByLabel("Laserfiche version and build").fill("Version 12 build 1202");
+  await answersDialog.getByLabel("Outcome").selectOption("partially-helped");
+  await expectVisible(answersDialog.getByText("Outcome: Partially helped"), "Answers response preview did not update.");
+  const answersAccessibilityResults = await new AxeBuilder({ page }).include(".answers-contribution-dialog").analyze();
+  const seriousAnswersAccessibilityIssues = answersAccessibilityResults.violations.filter((issue) => ["serious", "critical"].includes(issue.impact));
+  if (seriousAnswersAccessibilityIssues.length) {
+    throw new Error(`Answers dialog accessibility violations: ${seriousAnswersAccessibilityIssues.flatMap((issue) => issue.nodes.map((node) => `${issue.id} (${node.target.join(" ")})`)).join(", ")}`);
+  }
+  await page.keyboard.press("Escape");
+  if (await answersDialog.isVisible().catch(() => false)) throw new Error("Escape did not close the Answers contribution dialog.");
 
   await page.goBack();
   await expectVisible(page.getByText("Get started"), "Browser Back did not clear the selected error.");

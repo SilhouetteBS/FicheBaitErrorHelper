@@ -4,15 +4,21 @@ Thank you for helping improve the FicheBait Error Helper.
 
 ## Contribution Model
 
-Public contributions should be submitted as GitHub Issues, not pull requests.
+Troubleshooting outcomes should be shared on the linked Laserfiche Answers discussion so the wider Laserfiche community can review and benefit from them. Answers-backed sources in the helper provide a `Share outcome on Answers` action that creates a structured response for the contributor to post.
 
-Maintainers make the actual catalog, source-ledger, and code changes after reviewing the issue. This keeps troubleshooting guidance consistent, source-backed, and auditable.
+GitHub Issues are the fallback for incorrect Error Helper metadata, locked Answers posts, missing discussions, and source-ledger corrections. Public contributions should not be submitted as pull requests.
+
+Maintainers make the actual catalog, source-ledger, and code changes after reviewing submitted evidence. This keeps troubleshooting guidance consistent, source-backed, and auditable.
+
+Answers replies and GitHub reports do not directly change source confidence, fix status, validation status, version applicability, or published troubleshooting guidance.
 
 ## Use These Issue Templates
 
 - `Report an error entry`: incorrect product, version, code, message, symptom, or missing entry.
 - `Suggest a fix source`: official documentation or Laserfiche Answers source that supports a fix, workaround, diagnostic step, or scenario.
 - `Correct a source`: broken link, wrong source type, duplicate source, or source metadata correction.
+
+Do not open a duplicate GitHub Issue when the relevant evidence can be added to an active Answers discussion.
 
 ## What To Include
 

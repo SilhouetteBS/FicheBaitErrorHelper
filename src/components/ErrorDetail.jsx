@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -6,10 +6,12 @@ import {
   Check,
   ExternalLink,
   MessageSquarePlus,
+  MessageSquareReply,
   Share2,
   Stethoscope,
   Wrench,
 } from "lucide-react";
+import { isAnswersUrl } from "../answersContribution.js";
 import { sourcePriority, sourceTypeOptions } from "../data/catalogMetadata.js";
 import { normalizeCode } from "../search.js";
 import {
@@ -19,6 +21,7 @@ import {
   validationStatusMetadata,
 } from "../statusMetadata.js";
 import { TooltipIcon } from "./TooltipIcon.jsx";
+import { AnswersContributionDialog } from "./AnswersContributionDialog.jsx";
 
 function fixStatusValue(entry) {
   if (entry.fixStatus) return entry.fixStatus;
@@ -112,6 +115,7 @@ function ScenarioList({ title, items = [], ordered = false }) {
 }
 
 export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidateReviews, onSelect, onShare, onBack }) {
+  const [contributionTarget, setContributionTarget] = useState(null);
   const candidateSummary = candidateReviewSummary(entry.id, sourceCandidateReviews);
   const sameCodeEntries = allEntries
     .filter((candidate) => candidate.id !== entry.id && normalizeCode(candidate.code) === normalizeCode(entry.code))
@@ -171,7 +175,20 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
                       <strong>Scenario sources</strong>
                       <ul>{scenario.sourceUrls.map((url) => {
                         const sourceItem = entry.sources.find((source) => source.url === url);
-                        return <li key={url}><a href={url} rel="noreferrer" target="_blank">{sourceItem?.title ?? url}</a></li>;
+                        return (
+                          <li key={url}>
+                            <a href={url} rel="noreferrer" target="_blank">{sourceItem?.title ?? url}</a>
+                            {isAnswersUrl(url) && (
+                              <button
+                                className="answers-contribution-button"
+                                onClick={() => setContributionTarget({ source: sourceItem ?? { title: url, url }, scenario })}
+                                type="button"
+                              >
+                                <MessageSquareReply aria-hidden="true" size={15} />Share outcome
+                              </button>
+                            )}
+                          </li>
+                        );
                       })}</ul>
                     </div>
                   )}
@@ -213,10 +230,21 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
         <section className="side-card">
           <h3>Links to Sources</h3>
           <div className="source-list">{entry.sources.map((sourceItem, index) => (
-            <a className="source-card" href={sourceItem.url} key={`${sourceItem.sourceType}-${sourceItem.url}-${index}`} rel="noreferrer" target="_blank">
-              <span className="source-card-content"><span>{sourceItem.title}</span><span className="source-card-meta"><SourceBadge sourceType={sourceItem.sourceType} /><ReviewStatusBadge value={reviewedSources.get(sourceItem.url) ?? "curated"} /></span></span>
-              <ExternalLink aria-hidden="true" size={16} />
-            </a>
+            <div className="source-card-row" key={`${sourceItem.sourceType}-${sourceItem.url}-${index}`}>
+              <a className="source-card" href={sourceItem.url} rel="noreferrer" target="_blank">
+                <span className="source-card-content"><span>{sourceItem.title}</span><span className="source-card-meta"><SourceBadge sourceType={sourceItem.sourceType} /><ReviewStatusBadge value={reviewedSources.get(sourceItem.url) ?? "curated"} /></span></span>
+                <ExternalLink aria-hidden="true" size={16} />
+              </a>
+              {isAnswersUrl(sourceItem.url) && (
+                <button
+                  className="answers-contribution-button"
+                  onClick={() => setContributionTarget({ source: sourceItem, scenario: null })}
+                  type="button"
+                >
+                  <MessageSquareReply aria-hidden="true" size={15} />Share outcome on Answers
+                </button>
+              )}
+            </div>
           ))}</div>
         </section>
         {sameCodeEntries.length > 0 && (
@@ -229,6 +257,15 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
         )}
         {entry.notes && <div className="caution"><AlertTriangle aria-hidden="true" size={18} /><p>{entry.notes}</p></div>}
       </aside>
+      {contributionTarget && (
+        <AnswersContributionDialog
+          correctionUrl={correctionIssueUrl(entry)}
+          entry={entry}
+          onClose={() => setContributionTarget(null)}
+          scenario={contributionTarget.scenario}
+          source={contributionTarget.source}
+        />
+      )}
     </article>
   );
 }

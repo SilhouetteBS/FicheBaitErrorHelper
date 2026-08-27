@@ -878,6 +878,39 @@ li + li {
   font-weight: 650;
 }
 
+.scenario-sources li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scenario-sources li > a {
+  min-width: 0;
+}
+
+.answers-contribution-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  padding: 0;
+  color: var(--link);
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.answers-contribution-button:hover,
+.answers-contribution-button:focus-visible {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
 .notice {
   display: flex;
   align-items: flex-start;
@@ -1170,6 +1203,18 @@ li + li {
   gap: 8px;
 }
 
+.source-card-row {
+  display: grid;
+  gap: 7px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.source-card-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
 .source-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1194,6 +1239,10 @@ li + li {
 
 .source-card:hover {
   text-decoration: underline;
+}
+
+.source-card-row > .answers-contribution-button {
+  justify-self: start;
 }
 
 .same-code-list {
@@ -1455,6 +1504,167 @@ li + li {
 
 .dialog-content ol {
   color: #26313c;
+}
+
+.answers-contribution-dialog {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 44px);
+  overflow-y: auto;
+}
+
+.dialog-eyebrow {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--link);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.answers-contribution-form {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px 18px;
+}
+
+.answers-source-context {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  background: var(--surface-soft);
+}
+
+.answers-source-context span {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.answers-contribution-form label {
+  display: grid;
+  gap: 6px;
+  color: #26313c;
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.answers-contribution-form input,
+.answers-contribution-form select,
+.answers-contribution-form textarea {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  padding: 9px 10px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-weight: 500;
+}
+
+.answers-contribution-form textarea {
+  resize: vertical;
+}
+
+.answers-contribution-form input:focus,
+.answers-contribution-form select:focus,
+.answers-contribution-form textarea:focus {
+  border-color: var(--link);
+  outline: 2px solid rgba(28, 115, 254, 0.18);
+  outline-offset: 1px;
+}
+
+.answers-reply-preview {
+  display: grid;
+  gap: 6px;
+}
+
+.answers-reply-preview > span {
+  color: #26313c;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.answers-reply-preview pre {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 10px 12px;
+  color: #26313c;
+  background: #f7f9fb;
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.answers-privacy-note,
+.answers-copy-status {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.answers-privacy-note {
+  color: var(--muted);
+}
+
+.answers-copy-status {
+  color: #155f3b;
+  font-weight: 750;
+}
+
+.answers-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.answers-dialog-actions a,
+.answers-dialog-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  border-radius: 5px;
+  padding: 8px 11px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.answers-dialog-actions > a:first-child {
+  margin-right: auto;
+  padding-left: 0;
+  color: var(--link);
+}
+
+.answers-dialog-actions .secondary-button {
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.answers-dialog-actions .primary-button {
+  border: 1px solid var(--link);
+  color: #ffffff;
+  background: var(--link);
+}
+
+.answers-dialog-actions .secondary-button:hover,
+.answers-dialog-actions .secondary-button:focus-visible {
+  border-color: var(--link);
+}
+
+.answers-dialog-actions .primary-button:hover,
+.answers-dialog-actions .primary-button:focus-visible {
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
 }
 
 @media (max-width: 1180px) {
@@ -1811,6 +2021,41 @@ li + li {
   .side-card,
   .caution {
     padding: 11px;
+  }
+
+  .scenario-sources li {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .answers-contribution-button {
+    min-height: 36px;
+    justify-self: start;
+  }
+
+  .answers-contribution-dialog {
+    max-height: calc(100vh - 20px);
+  }
+
+  .answers-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .answers-dialog-actions > a:first-child {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-right: 0;
+  }
+
+  .answers-dialog-actions .primary-button {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .answers-dialog-actions .secondary-button {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .ledger-panel {
