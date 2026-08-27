@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, MessageSquareReply, X } from "lucide-react";
 import {
   answersOutcomeOptions,
+  answersTargetLabel,
   buildAnswersReply,
 } from "../answersContribution.js";
 
@@ -21,13 +22,15 @@ async function copyToClipboard(text) {
   textarea.remove();
 }
 
-export function AnswersContributionDialog({ entry, source, scenario, correctionUrl, onClose }) {
+export function AnswersContributionDialog({ entry, targets, correctionUrl, onClose }) {
+  const [targetIndex, setTargetIndex] = useState(0);
   const [outcome, setOutcome] = useState("resolved");
   const [versionBuild, setVersionBuild] = useState("");
   const [context, setContext] = useState("");
   const [status, setStatus] = useState("");
   const dialogRef = useRef(null);
   const closeButtonRef = useRef(null);
+  const { source, scenario } = targets[targetIndex];
 
   const reply = useMemo(
     () => buildAnswersReply({ entry, source, scenario, outcome, versionBuild, context }),
@@ -104,6 +107,25 @@ export function AnswersContributionDialog({ entry, source, scenario, correctionU
           </button>
         </div>
         <form className="answers-contribution-form" onSubmit={handleSubmit}>
+          {targets.length > 1 && (
+            <label>
+              Answers discussion or scenario
+              <select
+                onChange={(event) => {
+                  setTargetIndex(Number(event.target.value));
+                  setStatus("");
+                }}
+                value={targetIndex}
+              >
+                {targets.map((target, index) => (
+                  <option key={`${target.source.url}-${target.scenario?.title ?? "general"}`} value={index}>
+                    {answersTargetLabel(target)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <div className="answers-source-context">
             <strong>{scenario?.title ?? entry.code}</strong>
             <span>{source.title}</span>

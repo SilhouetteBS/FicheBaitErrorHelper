@@ -46,7 +46,7 @@ try {
   await page.getByText("Likely Fixes").waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: desktopScreenshot, fullPage: false });
   const visible = await page.getByText("Likely Fixes").isVisible();
-  await page.getByRole("button", { name: "Share outcome on Answers", exact: true }).first().click();
+  await page.getByRole("button", { name: "Contribute on Answers", exact: true }).click();
   const answersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
   await answersDialog.waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: answersDialogScreenshot, fullPage: false });
@@ -83,7 +83,7 @@ try {
   await page.screenshot({ path: mobileScreenshot, fullPage: false });
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await page.goto(`${url}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Share outcome on Answers", exact: true }).first().click();
+  await page.getByRole("button", { name: "Contribute on Answers", exact: true }).click();
   const mobileAnswersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
   await mobileAnswersDialog.waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: mobileAnswersDialogScreenshot, fullPage: false });

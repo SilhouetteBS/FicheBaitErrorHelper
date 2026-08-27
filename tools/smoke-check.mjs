@@ -124,11 +124,17 @@ try {
   }
   if (href.length > 1500) throw new Error(`Correction link is too long: ${href.length} characters.`);
 
-  const answersContribution = page.getByRole("button", { name: "Share outcome on Answers", exact: true }).first();
-  await expectVisible(answersContribution, "Answers contribution action was not visible for an Answers source.");
+  const answersContribution = page.getByRole("button", { name: "Contribute on Answers", exact: true });
+  await expectVisible(answersContribution, "Top Answers contribution action was not visible for an Answers-backed entry.");
   await answersContribution.click();
   const answersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
   await expectVisible(answersDialog, "Answers contribution dialog did not open.");
+  const answersTargetSelect = answersDialog.getByLabel("Answers discussion or scenario");
+  await expectVisible(answersTargetSelect, "An entry with multiple Answers sources did not provide a source selector.");
+  if ((await answersTargetSelect.locator("option").count()) < 2) {
+    throw new Error("Answers source selector did not include the entry's multiple discussions.");
+  }
+  await answersTargetSelect.selectOption("1");
   await answersDialog.getByLabel("Laserfiche version and build").fill("Version 12 build 1202");
   await answersDialog.getByLabel("Outcome").selectOption("partially-helped");
   await expectVisible(answersDialog.getByText("Outcome: Partially helped"), "Answers response preview did not update.");

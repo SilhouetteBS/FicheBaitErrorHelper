@@ -3,7 +3,7 @@
 ## How Users Should Contribute
 
 1. Search the live helper for the error code or message.
-2. For an Answers-backed source or scenario, use `Share outcome on Answers` to generate a structured reply and open the original discussion.
+2. For an Answers-backed entry, use `Contribute on Answers` to select the relevant source or scenario, generate a structured reply, and open the original discussion.
 3. Include the product, exact version/build, outcome, and relevant sanitized context in the Answers reply.
 4. Use `Report Correction` for incorrect Error Helper metadata, an Answers post that cannot accept replies, or an entry without a relevant Answers discussion.
 5. Remove private data, credentials, hostnames, repository names, license details, and customer-identifying information.

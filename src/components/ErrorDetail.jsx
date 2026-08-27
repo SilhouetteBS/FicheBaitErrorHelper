@@ -11,7 +11,7 @@ import {
   Stethoscope,
   Wrench,
 } from "lucide-react";
-import { isAnswersUrl } from "../answersContribution.js";
+import { answersContributionTargets, isAnswersUrl } from "../answersContribution.js";
 import { sourcePriority, sourceTypeOptions } from "../data/catalogMetadata.js";
 import { normalizeCode } from "../search.js";
 import {
@@ -117,6 +117,7 @@ function ScenarioList({ title, items = [], ordered = false }) {
 export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidateReviews, onSelect, onShare, onBack }) {
   const [contributionTarget, setContributionTarget] = useState(null);
   const candidateSummary = candidateReviewSummary(entry.id, sourceCandidateReviews);
+  const contributionTargets = answersContributionTargets(entry);
   const sameCodeEntries = allEntries
     .filter((candidate) => candidate.id !== entry.id && normalizeCode(candidate.code) === normalizeCode(entry.code))
     .sort((a, b) => a.product.localeCompare(b.product) || fixStatusValue(a).localeCompare(fixStatusValue(b)) || a.message.localeCompare(b.message))
@@ -143,6 +144,15 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           </div>
           <div className="detail-actions">
             <button onClick={() => onShare(entry)} type="button"><Share2 aria-hidden="true" size={17} />Share</button>
+            {contributionTargets.length > 0 && (
+              <button
+                className="answers-primary-action"
+                onClick={() => setContributionTarget(contributionTargets)}
+                type="button"
+              >
+                <MessageSquareReply aria-hidden="true" size={17} />Contribute on Answers
+              </button>
+            )}
             <a href={correctionIssueUrl(entry)} rel="noreferrer" target="_blank"><MessageSquarePlus aria-hidden="true" size={20} />Report Correction</a>
           </div>
         </div>
@@ -181,7 +191,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
                             {isAnswersUrl(url) && (
                               <button
                                 className="answers-contribution-button"
-                                onClick={() => setContributionTarget({ source: sourceItem ?? { title: url, url }, scenario })}
+                                onClick={() => setContributionTarget([{ source: sourceItem ?? { title: url, url }, scenario }])}
                                 type="button"
                               >
                                 <MessageSquareReply aria-hidden="true" size={15} />Share outcome
@@ -238,7 +248,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
               {isAnswersUrl(sourceItem.url) && (
                 <button
                   className="answers-contribution-button"
-                  onClick={() => setContributionTarget({ source: sourceItem, scenario: null })}
+                  onClick={() => setContributionTarget([{ source: sourceItem, scenario: null }])}
                   type="button"
                 >
                   <MessageSquareReply aria-hidden="true" size={15} />Share outcome on Answers
@@ -262,8 +272,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           correctionUrl={correctionIssueUrl(entry)}
           entry={entry}
           onClose={() => setContributionTarget(null)}
-          scenario={contributionTarget.scenario}
-          source={contributionTarget.source}
+          targets={contributionTarget}
         />
       )}
     </article>

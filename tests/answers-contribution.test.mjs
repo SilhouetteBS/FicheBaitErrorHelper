@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  answersContributionTargets,
   buildAnswersReply,
   isAnswersUrl,
 } from "../src/answersContribution.js";
@@ -40,4 +41,23 @@ test("Answers replies preserve product, version, scenario, outcome, and context"
   assert.match(reply, /Scenario or source reviewed: Directory account lockout/);
   assert.match(reply, /Outcome: Partially helped/);
   assert.match(reply, /Additional relevant details: The account unlocked/);
+});
+
+test("Answers contribution targets retain scenario context and omit duplicate generic targets", () => {
+  const targets = answersContributionTargets({
+    ...entry,
+    sources: [
+      source,
+      { title: "Second Answers discussion", url: "https://answers.laserfiche.com/questions/2/second" },
+      { title: "Official documentation", url: "https://doc.laserfiche.com/example" },
+    ],
+    scenarios: [
+      { title: "Directory account lockout", sourceUrls: [source.url] },
+    ],
+  });
+
+  assert.equal(targets.length, 2);
+  assert.equal(targets[0].scenario.title, "Directory account lockout");
+  assert.equal(targets[0].source.url, source.url);
+  assert.equal(targets[1].scenario, null);
 });

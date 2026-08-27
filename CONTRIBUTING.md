@@ -4,7 +4,7 @@ Thank you for helping improve the FicheBait Error Helper.
 
 ## Contribution Model
 
-Troubleshooting outcomes should be shared on the linked Laserfiche Answers discussion so the wider Laserfiche community can review and benefit from them. Answers-backed sources in the helper provide a `Share outcome on Answers` action that creates a structured response for the contributor to post.
+Troubleshooting outcomes should be shared on the linked Laserfiche Answers discussion so the wider Laserfiche community can review and benefit from them. Answers-backed entries provide a prominent `Contribute on Answers` action that creates a structured response for the contributor to post.
 
 GitHub Issues are the fallback for incorrect Error Helper metadata, locked Answers posts, missing discussions, and source-ledger corrections. Public contributions should not be submitted as pull requests.
 

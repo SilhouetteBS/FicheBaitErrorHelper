@@ -46,7 +46,7 @@ See `docs/known-limitations.md` for the current limitations and safety notes.
 
 ## Contribution Paths
 
-- Share version-specific troubleshooting outcomes through the linked Laserfiche Answers discussion using `Share outcome on Answers`.
+- Share version-specific troubleshooting outcomes through the linked Laserfiche Answers discussion using `Contribute on Answers`.
 - Report an incorrect or missing error entry with the `Report an error entry` issue template.
 - Suggest a source-backed fix with the `Suggest a fix source` issue template.
 - Correct source metadata with the `Correct a source` issue template.
