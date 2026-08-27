@@ -554,6 +554,10 @@ h3 {
   padding: 18px 22px 22px;
 }
 
+.detail-main {
+  min-width: 0;
+}
+
 .mobile-back-button {
   display: none;
 }
@@ -641,8 +645,11 @@ h3 {
 }
 
 .detail-header h2 {
+  max-width: 100%;
   font-size: clamp(1.55rem, 2vw, 2.15rem);
   line-height: 1.08;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .error-description {
@@ -689,6 +696,21 @@ h3 {
 .detail-actions a:hover,
 .detail-actions a:focus-visible {
   color: var(--accent-dark);
+}
+
+@media (min-width: 1181px) {
+  .results-pane,
+  .detail-pane {
+    max-height: min(760px, 72vh);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .results-pane .pane-heading {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 }
 
 .toast {

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -23,6 +24,15 @@ function fixStatusValue(entry) {
   if (entry.fixStatus) return entry.fixStatus;
   if (entry.confidence === "low") return "needs-review";
   return "diagnostic-only";
+}
+
+function breakableCode(code) {
+  return code.split(/([_-])/).map((part, index) => (
+    <Fragment key={`${index}-${part}`}>
+      {part}
+      {/[_-]/.test(part) && <wbr />}
+    </Fragment>
+  ));
 }
 
 function candidateReviewSummary(entryId, reviewsByEntry) {
@@ -125,7 +135,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
                 <TooltipIcon text="A related Laserfiche Answers source was reviewed for this entry. Accepted candidates may add scenario-specific fixes; reviewed candidates may simply rule out a source." />
               </span>
             )}
-            <h2>{entry.code}</h2>
+            <h2>{breakableCode(entry.code)}</h2>
           </div>
           <div className="detail-actions">
             <button onClick={() => onShare(entry)} type="button"><Share2 aria-hidden="true" size={17} />Share</button>

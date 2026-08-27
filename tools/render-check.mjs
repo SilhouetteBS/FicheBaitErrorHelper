@@ -7,7 +7,10 @@ import { browserLaunchOptions } from "./browser-launch.mjs";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const desktopScreenshot = resolve(rootDir, "dist", "render-check.png");
+const longTitleScreenshot = resolve(rootDir, "dist", "render-check-long-title.png");
 const mobileScreenshot = resolve(rootDir, "dist", "render-check-mobile.png");
+const longTitleEntryId =
+  "support-promoted-1014518-forms-forms-improving-performance-in-laserfich-improving-performance-in-laserfiche-forms-versions-10-3-1-onward";
 let server;
 let browser;
 
@@ -41,6 +44,29 @@ try {
   await page.getByText("Likely Fixes").waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: desktopScreenshot, fullPage: false });
   const visible = await page.getByText("Likely Fixes").isVisible();
+  await page.goto(`${url}?error=${longTitleEntryId}`, { waitUntil: "networkidle" });
+  const longTitle = page.getByRole("heading", { name: "FORMS-IMPROVING_PERFORMANCE_IN_LASERFICH" });
+  await longTitle.waitFor({ state: "visible", timeout: 10_000 });
+  const desktopLongTitleOverflow = await page.evaluate(() => {
+    const title = document.querySelector(".detail-header h2")?.getBoundingClientRect();
+    const main = document.querySelector(".detail-main")?.getBoundingClientRect();
+    return !title || !main || title.right > main.right + 0.5 || document.documentElement.scrollWidth > window.innerWidth;
+  });
+  const desktopPaneScroll = await page.evaluate(async () => {
+    const results = document.querySelector(".results-pane");
+    const detail = document.querySelector(".detail-pane");
+    if (!results || !detail) return { valid: false };
+    const detailTop = detail.getBoundingClientRect().top;
+    const pageScrollTop = window.scrollY;
+    results.scrollTop = Math.min(600, results.scrollHeight - results.clientHeight);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return {
+      valid: results.scrollHeight > results.clientHeight && results.scrollTop > 0,
+      detailStayedAligned: Math.abs(detail.getBoundingClientRect().top - detailTop) < 0.5,
+      pageStayedPut: window.scrollY === pageScrollTop,
+    };
+  });
+  await page.screenshot({ path: longTitleScreenshot, fullPage: false });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Back to results" }).waitFor({ state: "visible" });
   await page.screenshot({ path: mobileScreenshot, fullPage: false });
@@ -48,8 +74,12 @@ try {
   await browser.close();
   browser = null;
   if (!visible) throw new Error("Detail pane did not render expected troubleshooting section.");
+  if (desktopLongTitleOverflow) throw new Error("Long error title overflows the desktop detail column.");
+  if (!desktopPaneScroll.valid || !desktopPaneScroll.detailStayedAligned || !desktopPaneScroll.pageStayedPut) {
+    throw new Error("Desktop result scrolling does not keep the detail pane aligned.");
+  }
   if (mobileOverflow) throw new Error("Mobile viewport has horizontal overflow.");
-  if (!existsSync(desktopScreenshot) || !existsSync(mobileScreenshot)) {
+  if (!existsSync(desktopScreenshot) || !existsSync(longTitleScreenshot) || !existsSync(mobileScreenshot)) {
     throw new Error("Render check screenshots were not written.");
   }
   if (consoleErrors.length > 0) throw new Error(`Console errors: ${consoleErrors.join("; ")}`);
