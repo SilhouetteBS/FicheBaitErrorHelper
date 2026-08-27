@@ -5,6 +5,7 @@ import {
   BookOpen,
   ChevronRight,
   ExternalLink,
+  GitBranch,
   MessageSquarePlus,
   MessageSquareReply,
   Share2,
@@ -85,9 +86,9 @@ function SourceBadge({ sourceType }) {
   return <span className={`source-badge ${sourceType}`}>{labels[sourceType] ?? sourceType}</span>;
 }
 
-function DetailSection({ title, children, icon: Icon = BookOpen, tooltip }) {
+function DetailSection({ title, children, icon: Icon = BookOpen, tooltip, variant = "neutral" }) {
   return (
-    <section className="detail-section">
+    <section className={`detail-section detail-section-${variant}`}>
       <div className="section-label">
         <Icon aria-hidden="true" size={17} />
         <h3>{title}</h3>
@@ -98,11 +99,11 @@ function DetailSection({ title, children, icon: Icon = BookOpen, tooltip }) {
   );
 }
 
-function ScenarioList({ title, items = [], ordered = false }) {
+function ScenarioList({ title, items = [], ordered = false, variant = "neutral" }) {
   if (!items.length) return null;
   const ListTag = ordered ? "ol" : "ul";
   return (
-    <div className="scenario-block">
+    <div className={`scenario-block scenario-block-${variant}`}>
       <strong>{title}</strong>
       <ListTag>{items.map((item) => <li key={item}>{item}</li>)}</ListTag>
     </div>
@@ -151,7 +152,7 @@ function PathEvidence({ sources, reviewedSources, onContribute, title = "Evidenc
 
   return (
     <div className="path-evidence">
-      {title && <strong>{title}</strong>}
+      {title && <div className="path-evidence-title"><BookOpen aria-hidden="true" size={15} /><strong>{title}</strong></div>}
       <div className="path-evidence-list">{sources.map((sourceItem, index) => (
         <div className="path-evidence-row" key={`${sourceItem.url}-${index}`}>
           <span className="evidence-index">[{index + 1}]</span>
@@ -181,9 +182,9 @@ function ResolutionPath({ path, defaultOpen, reviewedSources, onContribute }) {
   const body = (
     <div className="resolution-path-body">
       <div className="resolution-columns">
-        <ScenarioList title="Matching Symptoms" items={path.symptoms} />
-        <ScenarioList title="Likely Causes" items={path.causes} />
-        <ScenarioList title="Fixes / Next Steps" items={path.fixes} ordered />
+        <ScenarioList title="Matching Symptoms" items={path.symptoms} variant="symptoms" />
+        <ScenarioList title="Likely Causes" items={path.causes} variant="causes" />
+        <ScenarioList title="Fixes / Next Steps" items={path.fixes} ordered variant="fixes" />
       </div>
       <PathEvidence
         onContribute={(source) => onContribute(source, path.general ? null : path)}
@@ -269,10 +270,10 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           </div>
         </div>
         <p className="entry-summary">{entry.summary}</p>
-        <DetailSection title="Symptoms" icon={Stethoscope}>
+        <DetailSection title="Symptoms" icon={Stethoscope} variant="symptoms">
           <ul>{entry.symptoms.map((symptom) => <li key={symptom}>{symptom}</li>)}</ul>
         </DetailSection>
-        <DetailSection title="Resolution Paths" icon={Wrench} tooltip="Each path groups symptoms, causes, fixes, and the reviewed evidence that applies to that troubleshooting context.">
+        <DetailSection title="Resolution Paths" icon={Wrench} tooltip="Each path groups symptoms, causes, fixes, and the reviewed evidence that applies to that troubleshooting context." variant="resolution">
           <div className="resolution-list">{paths.map((path, index) => (
             <ResolutionPath
               defaultOpen={index === 0}
@@ -284,7 +285,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           ))}</div>
         </DetailSection>
         <details className="all-reviewed-sources">
-          <summary>All Reviewed Sources <span>{entry.sources.length}</span></summary>
+          <summary><BookOpen aria-hidden="true" size={17} /><span className="disclosure-label">All Reviewed Sources</span><span className="disclosure-count">{entry.sources.length}</span></summary>
           <PathEvidence
             onContribute={(source) => setContributionTarget([{ source, scenario: null }])}
             reviewedSources={reviewedSources}
@@ -293,7 +294,7 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           />
         </details>
         {sameCodeEntries.length > 0 && (
-          <DetailSection title="Same Code, Other Contexts" tooltip="The same numeric or product code can have different causes and fixes depending on product, version, and source context.">
+          <DetailSection title="Same Code, Other Contexts" icon={GitBranch} tooltip="The same numeric or product code can have different causes and fixes depending on product, version, and source context." variant="related">
             <div className="same-code-list">{sameCodeEntries.map((relatedEntry) => (
               <button key={relatedEntry.id} onClick={() => onSelect(relatedEntry.id)} type="button"><span><strong>{relatedEntry.product}</strong>{relatedEntry.message}</span><FixStatusBadge value={fixStatusValue(relatedEntry)} /></button>
             ))}</div>
