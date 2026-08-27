@@ -7,6 +7,7 @@ import { browserLaunchOptions } from "./browser-launch.mjs";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const desktopScreenshot = resolve(rootDir, "dist", "render-check.png");
+const ledgerScreenshot = resolve(rootDir, "dist", "render-check-ledger.png");
 const answersDialogScreenshot = resolve(rootDir, "dist", "render-check-answers-dialog.png");
 const resolutionPathsScreenshot = resolve(rootDir, "dist", "render-check-resolution-paths.png");
 const longTitleScreenshot = resolve(rootDir, "dist", "render-check-long-title.png");
@@ -39,6 +40,22 @@ try {
   await page.goto(url, { waitUntil: "networkidle" });
   const firstVisitInstructionsVisible = await page.getByText("Get started").isVisible();
   if (!firstVisitInstructionsVisible) throw new Error("First visit did not show the instructions pane.");
+  const firstLedgerRow = page.locator(".ledger-row:not(.ledger-head)").first();
+  await firstLedgerRow.waitFor({ state: "visible", timeout: 10_000 });
+  const ledgerColumnsFit = await page.locator(".ledger-row:not(.ledger-head)").evaluateAll((rows) => rows.every((row) => {
+    const cells = row.querySelectorAll(":scope > span");
+    if (cells.length < 6) return false;
+    const rowBounds = row.getBoundingClientRect();
+    const sourceBounds = cells[0].getBoundingClientRect();
+    const typeBounds = cells[1].getBoundingClientRect();
+    const notesBounds = cells[5].getBoundingClientRect();
+    return sourceBounds.right <= typeBounds.left + 0.5
+      && notesBounds.right <= rowBounds.right + 0.5
+      && cells[0].scrollWidth <= cells[0].clientWidth + 1
+      && cells[5].scrollWidth <= cells[5].clientWidth + 1;
+  }));
+  await page.locator(".ledger-panel").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: ledgerScreenshot, fullPage: false });
   await page.getByPlaceholder("Search code, message, symptom, product, or fix").fill("9030");
   await page.waitForURL(/q=9030/);
   const resultGroup = page.getByRole("button", { name: /Laserfiche Server\/Repository Server/ });
@@ -105,6 +122,7 @@ try {
   await browser.close();
   browser = null;
   if (!visible) throw new Error("Detail pane did not render expected resolution-path section.");
+  if (!ledgerColumnsFit) throw new Error("Reviewed Source Ledger content overflows its assigned columns.");
   if (scenarioPathCount < 2 || firstPathEvidenceCount < 1) throw new Error("Scenario entry did not render source-linked resolution paths.");
   if (desktopDialogOverflow) throw new Error("Answers contribution dialog exceeds the desktop viewport.");
   if (desktopLongTitleOverflow) throw new Error("Long error title overflows the desktop detail column.");
@@ -114,7 +132,7 @@ try {
   if (mobileOverflow) throw new Error("Mobile viewport has horizontal overflow.");
   if (mobileResolutionOverflow) throw new Error("Mobile resolution paths cause horizontal overflow.");
   if (mobileDialogOverflow) throw new Error("Answers contribution dialog causes mobile horizontal overflow.");
-  if (!existsSync(desktopScreenshot) || !existsSync(answersDialogScreenshot) || !existsSync(resolutionPathsScreenshot) || !existsSync(longTitleScreenshot) || !existsSync(mobileScreenshot) || !existsSync(mobileResolutionPathsScreenshot) || !existsSync(mobileAnswersDialogScreenshot)) {
+  if (!existsSync(desktopScreenshot) || !existsSync(ledgerScreenshot) || !existsSync(answersDialogScreenshot) || !existsSync(resolutionPathsScreenshot) || !existsSync(longTitleScreenshot) || !existsSync(mobileScreenshot) || !existsSync(mobileResolutionPathsScreenshot) || !existsSync(mobileAnswersDialogScreenshot)) {
     throw new Error("Render check screenshots were not written.");
   }
   if (consoleErrors.length > 0) throw new Error(`Console errors: ${consoleErrors.join("; ")}`);

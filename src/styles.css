@@ -1498,6 +1498,15 @@ details.resolution-path[open] .resolution-toggle {
   text-decoration: none;
 }
 
+.ledger-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ledger-row > span:nth-child(6) {
+  line-height: 1.3;
+}
+
 .ledger-head {
   color: var(--muted);
   background: var(--surface-soft);
@@ -1542,7 +1551,7 @@ details.resolution-path[open] .resolution-toggle {
 
 .ledger-source-name {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   min-width: 0;
 }
@@ -1553,14 +1562,16 @@ details.resolution-path[open] .resolution-toggle {
 }
 
 .ledger-source-name strong {
+  display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .ledger-source-name a {
+  display: block;
   min-width: 0;
+  overflow: hidden;
   color: var(--link);
   text-decoration: none;
 }
