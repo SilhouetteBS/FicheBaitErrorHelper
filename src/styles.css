@@ -124,8 +124,8 @@ a {
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(280px, 2.15fr) minmax(116px, 0.62fr) minmax(116px, 0.62fr) minmax(178px, 0.9fr) auto auto;
-  gap: 14px;
+  grid-template-columns: minmax(250px, 1.7fr) minmax(116px, 0.72fr) minmax(112px, 0.66fr) minmax(178px, 1fr) auto auto;
+  gap: 10px;
   align-items: end;
 }
 
@@ -137,9 +137,9 @@ a {
 .search-control {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 54px;
-  padding: 0 14px;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 11px;
   border: 1px solid var(--line-strong);
   border-radius: 6px;
   background: var(--surface);
@@ -165,7 +165,7 @@ a {
 
 .filter-control {
   display: grid;
-  gap: 5px;
+  gap: 3px;
 }
 
 .source-filter {
@@ -175,14 +175,14 @@ a {
 .filter-control > span,
 .filter-control > label {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.73rem;
   font-weight: 650;
 }
 
 .filter-control select,
 .more-filters,
 .reset-button {
-  min-height: 54px;
+  min-height: 44px;
   border-radius: 6px;
 }
 
@@ -191,7 +191,7 @@ a {
   border: 1px solid var(--line-strong);
   color: var(--text);
   background: var(--surface);
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .more-filters,
@@ -199,11 +199,11 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
-  padding: 0 14px;
+  padding: 0 11px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -224,10 +224,10 @@ a {
 .advanced-filters {
   display: grid;
   grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(160px, 0.8fr));
-  gap: 14px;
+  gap: 10px;
   align-items: end;
-  margin-top: 12px;
-  padding: 14px;
+  margin-top: 9px;
+  padding: 11px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
@@ -1911,13 +1911,13 @@ details.resolution-path[open] .resolution-toggle {
   }
 
   .search-control {
-    min-height: 48px;
+    min-height: 44px;
   }
 
   .filter-control select,
   .more-filters,
   .reset-button {
-    min-height: 46px;
+    min-height: 44px;
   }
 
   .source-filter {
