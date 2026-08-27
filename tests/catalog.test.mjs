@@ -29,6 +29,34 @@ test("entry and ledger source classifications agree", () => {
   }
 });
 
+test("Laserfiche Installer contains installer failures rather than errors owned by other products", () => {
+  const workflowExample = errorEntries.find(
+    (entry) =>
+      entry.id ===
+      "laserfiche-installer-0588-wf1-issue-publishing-workflows-with-custom-activities-using-3rd-party",
+  );
+  assert.equal(workflowExample?.product, "Workflow");
+
+  const clientEmailExample = errorEntries.find(
+    (entry) =>
+      entry.id ===
+      "answers-promoted-laserfiche-installer-6000-a-microsoft-software-installer-error-was-encountered-error-6000",
+  );
+  assert.equal(clientEmailExample?.product, "Windows Client/Desktop Client");
+  assert.equal(clientEmailExample?.validationStatus, "reviewed-diagnostic");
+
+  const installerEntries = errorEntries.filter((entry) => entry.product === "Laserfiche Installer");
+  for (const entry of installerEntries) {
+    assert.doesNotMatch(entry.code, /(?:^|\s)(?:LFF\d|\d{4}-WF\d)/i, entry.id);
+  }
+
+  const nonErrorIds = new Set([
+    "support-promoted-1000619-laserfiche-installer-installer-list-of-fixes-in-laserfiche-6-11-list-of-fixes-in-laserfiche-6-11",
+    "support-promoted-1000988-laserfiche-installer-installer-license-file-locations-license-file-locations",
+  ]);
+  assert.equal(errorEntries.some((entry) => nonErrorIds.has(entry.id)), false);
+});
+
 test("generated runtime catalog remains in parity with curated data", async () => {
   assert.deepEqual(
     catalogIndex.map((entry) => entry.id).sort(),

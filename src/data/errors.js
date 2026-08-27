@@ -1676,9 +1676,9 @@ const curatedErrorEntries = [
     product: "Laserfiche Server/Repository Server",
     versions: ["Version 11", "Version 12"],
     confidence: "medium",
-    reviewedDate: "2026-06-27",
+    reviewedDate: "2026-08-27",
     summary:
-      "Laserfiche reports too many concurrent operations. A reviewed WebLink 11 thread identifies one known issue that required a Laserfiche Support supplied fix.",
+      "Laserfiche reports too many concurrent operations. A reviewed WebLink 11 thread identifies one known issue that required a Laserfiche Support supplied fix, and the Laserfiche 12 changelog documents a corrected Web Client/Office Integration session leak.",
     symptoms: [
       "Requests fail or log warnings with 9035.",
       "WebLink 11 operational logs may show the warning while loading tile data.",
@@ -1687,7 +1687,30 @@ const curatedErrorEntries = [
     likelyFixes: [
       "Check whether many long-running repository operations are active and retry when load is lower.",
       "For WebLink 11.0.2307.136 with repeated tile-data warnings, contact Laserfiche Support for the applicable fix.",
+      "For Web Client 12, update to Repository Web Client 12.0.2607.1345 or later when canceling the Office Integration Name Conflict dialog leaves search sessions running.",
       "Review product updates or hotfix guidance before applying private fixes in production.",
+    ],
+    scenarios: [
+      {
+        title: "Canceled Office Integration name conflict leaves a search session running",
+        summary:
+          "Laserfiche 12 could leave a search session active after the Office Integration Name Conflict dialog was canceled, eventually exhausting the allowed operation count.",
+        versions: ["Version 12"],
+        symptoms: [
+          "Users cancel the Name Conflict dialog while working through Office Integration in Web Client.",
+          "Later requests fail with There are too many existing operations running. [9035].",
+        ],
+        causes: [
+          "A Web Client defect left the canceled Office Integration search session running until the server operation limit was reached.",
+        ],
+        fixes: [
+          "Update Repository Web Client to 12.0.2607.1345 or later.",
+          "After updating, reproduce the cancel path and confirm repository operations no longer accumulate.",
+        ],
+        sourceUrls: [
+          "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        ],
+      },
     ],
     notes:
       "The strongest reviewed thread is WebLink-specific and mentions WebLink 11.0.2307.136. Treat that as a scenario-specific fix path.",
@@ -1704,6 +1727,13 @@ const curatedErrorEntries = [
         url: "https://answers.laserfiche.com/questions/221839/The-current-request-could-not-be-performed-because-there-are-too-many-existing-operations-running-9035",
         note:
           "Laserfiche employee response says the WebLink 11 scenario was a known issue and that Technical Support had a potential fix.",
+      },
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The July 16, 2026 Web Client changelog states that build 12.0.2607.1345 fixes a canceled Office Integration Name Conflict dialog leaving a search session running and eventually causing error 9035.",
       },
     ],
   },
@@ -18322,7 +18352,7 @@ const curatedErrorEntries = [
   },
   {
     id: "laserfiche-installer-1402-upgrading-from-8-3-to-10-3",
-    code: "Laserfiche Installer 1402",
+    code: "1402",
     message: "upgrading from 8.3 to 10.3",
     product: "Laserfiche Installer",
     versions: ["Version 9", "Version 10"],
@@ -21251,23 +21281,46 @@ const curatedErrorEntries = [
     code: "QF-AGENT-RPC-SERVER-UNAVAILABLE",
     message: "The RPC Server is unavailable",
     product: "Quick Fields",
-    versions: ["Version 11"],
+    versions: ["Version 11", "Version 12"],
     confidence: "high",
     fixStatus: "known-fix",
-    reviewedDate: "2026-07-01",
+    reviewedDate: "2026-08-27",
     summary:
-      "Quick Fields Agent 11 Update 3 could display The RPC Server is unavailable when running sessions that scan large PDF documents using Laserfiche Capture Engine.",
+      "Quick Fields Agent 11 Update 3 could display The RPC Server is unavailable when scanning large PDFs, and Quick Fields 12 could report the same message during large OCR workloads. Each version has a separate corrected build.",
     symptoms: [
       "Quick Fields Agent displays The RPC Server is unavailable.",
       "The failure occurs while running a session that scans a large PDF document.",
       "The session uses Laserfiche Capture Engine.",
+      "Quick Fields 12 may fail document identification during a large OCR workload.",
     ],
     likelyCauses: [
       "A Quick Fields Agent 11 Update 3 defect affected large PDF scans through Laserfiche Capture Engine.",
+      "A separate Quick Fields 12 defect could interrupt large OCR workloads with an unavailable RPC server.",
     ],
     likelyFixes: [
       "Install Quick Fields 11 Update 3 Hotfix 1014569 on the Quick Fields machine.",
       "After applying the hotfix, rerun the affected Quick Fields Agent session with the same large PDF workload.",
+      "For Quick Fields 12 large OCR workloads, update to build 12.0.2607.476 or later and rerun the failed identification workload.",
+    ],
+    scenarios: [
+      {
+        title: "Quick Fields 12 large OCR workload",
+        summary:
+          "Quick Fields and Quick Fields Agent 12 could encounter The RPC server is unavailable during large OCR workloads, causing some documents to fail identification.",
+        versions: ["Version 12"],
+        symptoms: [
+          "A large OCR workload reports The RPC server is unavailable.",
+          "Some documents fail identification when the RPC failure occurs.",
+        ],
+        causes: ["A Quick Fields 12 defect interrupted RPC communication during large OCR workloads."],
+        fixes: [
+          "Update Quick Fields and Quick Fields Agent to build 12.0.2607.476 or later.",
+          "Rerun the same OCR workload and verify that all documents complete identification.",
+        ],
+        sourceUrls: [
+          "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        ],
+      },
     ],
     validationStatus: "reviewed-diagnostic",
     sources: [
@@ -21277,6 +21330,13 @@ const curatedErrorEntries = [
         url: "https://support.laserfiche.com/kb/1014569/list-of-changes-for-quick-fields-11-update-3-hotfix-1014569",
         note:
           "Laserfiche Support KB states Hotfix 1014569 resolves Quick Fields Agent RPC Server unavailable errors for large PDF scans using Laserfiche Capture Engine.",
+      },
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The August 4, 2026 changelog states Quick Fields build 12.0.2607.476 fixes RPC server unavailable errors during large OCR workloads.",
       },
     ],
   },
@@ -21928,7 +21988,200 @@ const curatedErrorEntries = [
       },
     ],
   },
+  {
+    id: "laserfiche-installer-edge-data-directory",
+    code: "INSTALLER-EDGE-DATA-DIRECTORY",
+    message: "Microsoft Edge can't read and write to its data directory",
+    product: "Laserfiche Installer",
+    versions: ["Version 12"],
+    confidence: "high",
+    fixStatus: "diagnostic-only",
+    reviewedDate: "2026-08-27",
+    summary:
+      "The Laserfiche 12 Central Configuration Editor can fail to open with a Microsoft Edge data-directory error when a standard user launches it and supplies separate administrator credentials for elevation.",
+    symptoms: [
+      "The Central Configuration Editor does not open after the elevation prompt.",
+      "The message says Microsoft Edge can't read and write to its data directory.",
+      "The application was launched by a standard user who supplied administrator credentials for elevation.",
+    ],
+    likelyCauses: [
+      "A known Laserfiche Installer 12 issue affects the Central Configuration Editor when elevation changes the Windows identity used by its embedded Edge component.",
+    ],
+    likelyFixes: [
+      "Confirm the failure matches the documented standard-user elevation path before changing Edge or filesystem settings.",
+      "Check the Laserfiche 12 changelog for a newer Installer build that resolves issue 689489.",
+      "Use Laserfiche Support for an approved workaround if the Central Configuration Editor is required before a corrected build is available.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    notes:
+      "The August 4, 2026 changelog lists this as a known issue and does not publish a remediation, so this entry intentionally remains diagnostic-only.",
+    sources: [
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The August 4, 2026 Installer changelog documents this Central Configuration Editor elevation failure as known issue 689489.",
+      },
+    ],
+  },
+  {
+    id: "directory-server-invalid-primary-license-accented-characters",
+    code: "LFDS10 / LMO8",
+    message: "Invalid primary license",
+    product: "Directory Server",
+    versions: ["Version 12"],
+    confidence: "high",
+    fixStatus: "known-fix",
+    reviewedDate: "2026-08-27",
+    summary:
+      "Directory Server 12 could return (Invalid primary license.) (LFDS10)(LMO8) while creating a licensing site when the primary license contained accented characters.",
+    symptoms: [
+      "Creating a Directory Server licensing site fails.",
+      "The error is (Invalid primary license.) (LFDS10)(LMO8).",
+      "The primary license contains one or more accented characters.",
+    ],
+    likelyCauses: [
+      "A Directory Server 12 defect incorrectly rejected primary licenses containing accented characters.",
+    ],
+    likelyFixes: [
+      "Update Directory Server to 12.0.2607.421 or later.",
+      "Retry licensing-site creation with the same primary license after updating.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    sources: [
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The July 16, 2026 Directory Server changelog states build 12.0.2607.421 resolves LFDS10/LMO8 when a primary license contains accented characters.",
+      },
+    ],
+  },
+  {
+    id: "audit-trail-configuration-missing-configuration-abstractions",
+    code: "AUDIT-TRAIL-CONFIGURATION-ASSEMBLY",
+    message: "Could not load file or assembly Microsoft.Extensions.Configuration.Abstractions",
+    product: "Audit Trail",
+    versions: ["Version 12"],
+    confidence: "high",
+    fixStatus: "known-fix",
+    reviewedDate: "2026-08-27",
+    summary:
+      "The Laserfiche Audit Trail 12 Configuration Utility could fail while loading the Microsoft.Extensions.Configuration.Abstractions assembly.",
+    symptoms: [
+      "The Audit Trail Configuration Utility displays an assembly-load error.",
+      "The missing assembly named in the message is Microsoft.Extensions.Configuration.Abstractions.",
+    ],
+    likelyCauses: [
+      "An Audit Trail 12 packaging or dependency-loading defect affected the Configuration Utility.",
+    ],
+    likelyFixes: [
+      "Update Audit Trail to 12.0.2607.487 or later.",
+      "Open the Configuration Utility after updating and verify that it loads without the assembly error.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    sources: [
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The July 14, 2026 Audit Trail changelog states build 12.0.2607.487 resolves the Microsoft.Extensions.Configuration.Abstractions load error.",
+      },
+    ],
+  },
+  {
+    id: "audit-trail-install-fatal-error-iis-host-name",
+    code: "AUDIT-TRAIL-INSTALL-FATAL-HOST-BINDING",
+    message: "Fatal error during installation",
+    product: "Audit Trail",
+    versions: ["Version 12"],
+    confidence: "high",
+    fixStatus: "known-fix",
+    reviewedDate: "2026-08-27",
+    summary:
+      "Installing Audit Trail 12 could fail with Fatal error during installation when the target IIS site bindings contained a configured host name.",
+    symptoms: [
+      "Audit Trail installation stops with Fatal error during installation.",
+      "The IIS site selected for Audit Trail has a Host Name value in its bindings.",
+    ],
+    likelyCauses: [
+      "An Audit Trail 12 installer defect did not correctly handle IIS bindings that contained a host name.",
+    ],
+    likelyFixes: [
+      "Use Audit Trail installer build 12.0.2607.476 or later.",
+      "Retry installation against the same supported IIS binding after updating the installer.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    sources: [
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 Changelog",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+        note:
+          "The July 10, 2026 Audit Trail changelog states build 12.0.2607.476 resolves fatal installation errors when IIS site bindings contain a Host Name.",
+      },
+    ],
+  },
 ];
+
+const productCorrections = {
+  "answers-promoted-laserfiche-installer-6000-a-microsoft-software-installer-error-was-encountered-error-6000":
+    "Windows Client/Desktop Client",
+  "laserfiche-installer-0103-wf6-form-fields-are-not-populating-in-laserfiche-template": "Workflow",
+  "laserfiche-installer-0559-wf1-language-pack-on-laserfiche-12": "Workflow",
+  "laserfiche-installer-0588-wf1-issue-publishing-workflows-with-custom-activities-using-3rd-party":
+    "Workflow",
+  "laserfiche-installer-0645-wf1-laserfiche-workflow-9-1-license-error-0645-wf1": "Workflow",
+  "laserfiche-installer-0742-wf1-workflow-enhanced-security": "Workflow",
+  "laserfiche-installer-0757-wf0-connecting-forms-to-workflow-web-services-and-retrieve-forms-cont":
+    "Workflow",
+  "laserfiche-installer-0x5aac406e-mfc140u-dll-is-missing": "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80029c4a-error-code-6000-library-dll-error-code-0-mapi-e-failure-when-tr":
+    "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80040154-psigen-and-laserfiche": "Laserfiche Server/Repository Server",
+  "laserfiche-installer-0x80040310-operation-timed-out-784-error": "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80041a40-could-not-create-required-control-6720-on-opening-client":
+    "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80070002-remote-agent-script-can-t-load-dependencies": "Workflow",
+  "laserfiche-installer-0x8007007e-retrieving-the-com-class-factory-for-component-with-clsid-474a0":
+    "Laserfiche Server/Repository Server",
+  "laserfiche-installer-0x800706be-scanconnect-crash": "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80080005-server-execution-failed-lf-client": "Windows Client/Desktop Client",
+  "laserfiche-installer-0x80131620-laserfiche-import-freeze": "Windows Client/Desktop Client",
+  "laserfiche-installer-0xc0042330-failed-to-load-annotations-this-image-cannot-be-modified-genera":
+    "Windows Client/Desktop Client",
+  "laserfiche-installer-0xc0042533-upgraded-from-9-2-to-10-3-about-3-hours-ago-but-still-can-t-log":
+    "Laserfiche Server/Repository Server",
+  "laserfiche-installer-2044-rio-license-manager-error-2044-the-licensing-database-has-been-disabl":
+    "Directory Server",
+  "laserfiche-installer-6408-error-reading-file-code-6408": "Windows Client/Desktop Client",
+  "laserfiche-installer-6604-6604-failed-to-load-image-unknown-format": "Windows Client/Desktop Client",
+  "laserfiche-installer-6720-receiving-error-could-not-create-required-control-6720-when-trying-to-":
+    "Windows Client/Desktop Client",
+  "laserfiche-installer-784-784-error": "Laserfiche Server/Repository Server",
+  "laserfiche-installer-9008-9008-laserfiche-10-4-nueva-instalacion-con-backup-de-repositorio-10-3":
+    "Laserfiche Server/Repository Server",
+  "laserfiche-installer-9008-general-database-error-9008-after-8-3-to-10-4-update":
+    "Laserfiche Server/Repository Server",
+  "laserfiche-installer-9030-error-9030": "Laserfiche Server/Repository Server",
+  "laserfiche-installer-lff0337-lff0337-error": "Forms",
+  "laserfiche-installer-lff2007-emailsubmissionfailure1-forms-email-task": "Forms",
+  "laserfiche-installer-lff4112-pdfnetworkerror-forms-v-10-4-4-444-error-message": "Forms",
+};
+
+const nonErrorEntryIds = new Set([
+  "support-promoted-1000619-laserfiche-installer-installer-list-of-fixes-in-laserfiche-6-11-list-of-fixes-in-laserfiche-6-11",
+  "support-promoted-1000988-laserfiche-installer-installer-license-file-locations-license-file-locations",
+]);
+
+const genericInstallerGuidance =
+  "Review installer logs, Windows Installer errors, prerequisites, service account permissions, and whether repair/reinstall is safer than manual file changes.";
+
+const correctedProductGuidance =
+  "Review the affected product logs and Windows Event Viewer at the failure timestamp before changing production settings.";
 
 const curatedEntryKeys = new Set(
   [...curatedErrorEntries, ...answersChromePromotedErrorEntries, ...supportChromePromotedErrorEntries].map(
@@ -21941,17 +22194,32 @@ function applyCurationOverride(entry) {
   const sourcePromotion = sourceCandidatePromotions[entry.id];
   const validationOverride = validationTriageOverrides[entry.id];
   const augmentedSources = sourceAugmentations[entry.id] ?? [];
-  if (!override && !sourcePromotion && !validationOverride && augmentedSources.length === 0) return entry;
+  const correctedProduct = productCorrections[entry.id];
+  if (!override && !sourcePromotion && !validationOverride && augmentedSources.length === 0 && !correctedProduct) {
+    return entry;
+  }
 
   return {
     ...entry,
+    product: correctedProduct ?? entry.product,
+    code: correctedProduct ? entry.code.replace(/^Laserfiche Installer\s+/i, "") : entry.code,
+    summary: correctedProduct
+      ? entry.summary.replaceAll("Laserfiche Installer", correctedProduct)
+      : entry.summary,
     sources: mergeSources(entry.sources, augmentedSources),
     fixStatus: sourcePromotion?.fixStatus ?? override?.fixStatus ?? entry.fixStatus,
     confidence: sourcePromotion?.confidence ?? entry.confidence,
-    likelyFixes: mergeTextList(entry.likelyFixes, sourcePromotion?.likelyFixes ?? []),
+    likelyFixes: mergeTextList(
+      correctedProduct
+        ? entry.likelyFixes.map((item) =>
+            item === genericInstallerGuidance ? correctedProductGuidance : item,
+          )
+        : entry.likelyFixes,
+      sourcePromotion?.likelyFixes ?? [],
+    ),
     scenarios: mergeScenarios(entry.scenarios ?? [], sourcePromotion?.scenarios ?? []),
-    validationStatus: validationOverride?.validationStatus,
-    validationDisposition: validationOverride?.validationDisposition,
+    validationStatus: validationOverride?.validationStatus ?? entry.validationStatus,
+    validationDisposition: validationOverride?.validationDisposition ?? entry.validationDisposition,
     notes: [
       entry.notes,
       sourcePromotion?.curationNote && `Source candidate review: ${sourcePromotion.curationNote}`,
@@ -21999,9 +22267,21 @@ export const baseErrorEntries = [
   ...officialDocumentationErrorEntries.filter(
     (entry) => !curatedEntryKeys.has(`${entry.product}\u0000${entry.code}`),
   ),
-].sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }) || a.id.localeCompare(b.id));
+]
+  .filter((entry) => !nonErrorEntryIds.has(entry.id))
+  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }) || a.id.localeCompare(b.id));
 
 const overriddenErrorEntries = baseErrorEntries.map(applyCurationOverride);
+
+export const correctedProductsBySourceUrl = new Map();
+for (const entry of overriddenErrorEntries) {
+  if (!productCorrections[entry.id]) continue;
+  for (const source of entry.sources) {
+    const products = correctedProductsBySourceUrl.get(source.url) ?? new Set();
+    products.add(entry.product);
+    correctedProductsBySourceUrl.set(source.url, products);
+  }
+}
 
 export const sourceTypeByUrl = new Map();
 for (const entry of overriddenErrorEntries) {

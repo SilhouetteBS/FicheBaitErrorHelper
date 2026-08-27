@@ -1,5 +1,6 @@
 export const curationOverrides = {
   "admin-hub-agent-connectivity-logs": { fixStatus: "workaround", curationNote: "Employee-priority source notes provide actionable remediation, but not a universal confirmed fix." },
+  "answers-promoted-laserfiche-installer-6000-a-microsoft-software-installer-error-was-encountered-error-6000": { fixStatus: "diagnostic-only", curationNote: "The reviewed thread confirms this is a Windows Client email-generation error and contains no public resolution." },
   "api-server-powerautomate-file-not-found": { fixStatus: "workaround", curationNote: "Employee-priority source notes provide actionable remediation, but not a universal confirmed fix." },
   "audit-log-9237-could-not-enable": { fixStatus: "known-fix", curationNote: "Captured source notes include explicit fix, resolved, accepted-answer, or corrected-configuration language." },
   "audit-trail-addsearchabledata-permissions": { fixStatus: "known-fix", curationNote: "Captured source notes include explicit fix, resolved, accepted-answer, or corrected-configuration language." },

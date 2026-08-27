@@ -768,10 +768,10 @@ export const answersChromePromotedErrorEntries = [
     "notes": "Version scope is based on version text found in the recovered Answers search result.",
     "sources": [
       {
-        "sourceType": "answers-search",
+        "sourceType": "answers-community",
         "title": "A Microsoft Software Installer error was encountered : Error 6000",
         "url": "https://answers.laserfiche.com/questions/127078/A-Microsoft-Software-Installer-error-was-encountered--Error-6000",
-        "note": "Recovered Answers candidate promoted as a needs-review diagnostic entry; review the thread before treating it as a confirmed fix."
+        "note": "The reviewed thread documents Windows Client 10.2 email generation failing with 6000:0x80004023; no public resolution was posted."
       }
     ]
   },
@@ -2962,10 +2962,10 @@ export const answersChromePromotedReviewedSources = [
     "id": "answers-promoted-source-a-microsoft-software-installer-error-was-encountered-error-6000",
     "title": "A Microsoft Software Installer error was encountered : Error 6000",
     "url": "https://answers.laserfiche.com/questions/127078/A-Microsoft-Software-Installer-error-was-encountered--Error-6000",
-    "sourceType": "answers-search",
-    "reviewedDate": "2026-07-01",
+    "sourceType": "answers-community",
+    "reviewedDate": "2026-08-27",
     "productTags": [
-      "Laserfiche Installer",
+      "Windows Client/Desktop Client",
       "Version 10"
     ],
     "extractedErrorCodes": [

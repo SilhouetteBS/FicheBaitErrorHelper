@@ -1,6 +1,6 @@
 import { answersChromePromotedReviewedSources } from "./answersChromePromotions.js";
 import { supportChromePromotedReviewedSources } from "./supportChromePromotions.js";
-import { sourceTypeByUrl } from "./errors.js";
+import { correctedProductsBySourceUrl, sourceTypeByUrl } from "./errors.js";
 
 const reviewStatusRank = {
   curated: 1,
@@ -36,6 +36,11 @@ function dedupeReviewedSources(sources) {
   return [...byUrl.values()];
 }
 
+const referenceOnlySourceUrls = new Set([
+  "https://support.laserfiche.com/kb/1000619/list-of-fixes-in-laserfiche-6-11-",
+  "https://support.laserfiche.com/kb/1000988/license-file-locations-",
+]);
+
 export const reviewedSources = dedupeReviewedSources([
   ...answersChromePromotedReviewedSources,
   ...supportChromePromotedReviewedSources,
@@ -47,6 +52,31 @@ export const reviewedSources = dedupeReviewedSources([
     reviewedDate: "2026-06-27",
     productTags: ["Common Dialog", "Laserfiche Server/Repository Server", "Windows Client/Desktop Client", "Workflow"],
     extractedErrorCodes: ["6508", "9013", "9030", "9043", "9128"],
+    reviewStatus: "curated",
+  },
+  {
+    id: "lf12-changelog-2026-08-27-review",
+    title: "Laserfiche 12 Changelog",
+    url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/intro-laserfiche-12-changelog.htm",
+    sourceType: "official-docs",
+    reviewedDate: "2026-08-27",
+    productTags: [
+      "Audit Trail",
+      "Directory Server",
+      "Laserfiche Installer",
+      "Office Integration",
+      "Quick Fields",
+      "Version 12",
+      "Web Client",
+    ],
+    extractedErrorCodes: [
+      "9035",
+      "AUDIT-TRAIL-CONFIGURATION-ASSEMBLY",
+      "AUDIT-TRAIL-INSTALL-FATAL-HOST-BINDING",
+      "INSTALLER-EDGE-DATA-DIRECTORY",
+      "LFDS10-LMO8",
+      "QF-AGENT-RPC-SERVER-UNAVAILABLE",
+    ],
     reviewStatus: "curated",
   },
   {
@@ -9614,7 +9644,19 @@ export const reviewedSources = dedupeReviewedSources([
     extractedErrorCodes: ["INSTALLER-MOUNTED-ISO-DISK-ERROR"],
     reviewStatus: "curated",
   },
-]).map((source) => ({
-  ...source,
-  sourceType: sourceTypeByUrl.get(source.url) ?? source.sourceType,
-}));
+]).map((source) => {
+  const correctedProducts = correctedProductsBySourceUrl.get(source.url);
+  return {
+    ...source,
+    sourceType: sourceTypeByUrl.get(source.url) ?? source.sourceType,
+    reviewStatus: referenceOnlySourceUrls.has(source.url) ? "not-actionable" : source.reviewStatus,
+    productTags: correctedProducts
+      ? [
+          ...new Set([
+          ...(source.productTags ?? []).filter((tag) => tag !== "Laserfiche Installer"),
+          ...correctedProducts,
+          ]),
+        ]
+      : source.productTags,
+  };
+});

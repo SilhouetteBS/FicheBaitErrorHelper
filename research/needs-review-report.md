@@ -1,8 +1,8 @@
 # Needs Review Queue
 
-Generated: 2026-08-27T13:26:06.663Z
+Generated: 2026-08-27T16:35:33.265Z
 
-Total needs-review entries: 384
+Total needs-review entries: 381
 Support KB needs-review entries: 313
 
 ## By Product
@@ -20,16 +20,16 @@ Support KB needs-review entries: 313
 | Audit Trail | 10 |
 | Connector | 7 |
 | Import Agent | 7 |
-| Laserfiche Installer | 5 |
 | Mobile | 5 |
+| Laserfiche Installer | 2 |
 | Office Integration | 2 |
 
 ## By Source Type
 
 | Source Type | Needs Review |
 | --- | --- |
-| support-knowledge-base | 313 |
-| answers-search | 69 |
+| support-knowledge-base | 311 |
+| answers-search | 68 |
 | answers-laserfiche-employee | 2 |
 
 ## Entries
@@ -113,9 +113,6 @@ Support KB needs-review entries: 313
 | Import Agent | IMPORT-OPTIMIZING_OCR_FOR_SPEED_USING_THE | Optimizing OCR for Speed Using the Registry | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011679/optimizing-ocr-for-speed-using-the-registry |
 | Laserfiche Installer | 2755 | An "Internal Error 2755. 3 Path\myapp.msi" Error Occurs During Installation. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000989/an-internal-error-2755-3-path-myapp-msi-error-occurs-during-installation- |
 | Laserfiche Installer | 2908 | An "Internal Error 2908" Error Occurs During Installation. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011654/an-internal-error-2908-error-occurs-during-installation- |
-| Laserfiche Installer | 6000 | A Microsoft Software Installer error was encountered : Error 6000 | low | answers-search | https://answers.laserfiche.com/questions/127078/A-Microsoft-Software-Installer-error-was-encountered--Error-6000 |
-| Laserfiche Installer | INSTALLER-LICENSE_FILE_LOCATIONS | License File Locations. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000988/license-file-locations- |
-| Laserfiche Installer | INSTALLER-LIST_OF_FIXES_IN_LASERFICHE_6_11 | List of Fixes in LaserFiche 6.11. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1000619/list-of-fixes-in-laserfiche-6-11- |
 | Laserfiche Server/Repository Server | 0x800704c7 | Access Report Error | low | answers-search | https://answers.laserfiche.com/questions/65095/Access-Report-Error |
 | Laserfiche Server/Repository Server | 0x80020006 | LFAPI and Visual Fox Pro | low | answers-search | https://answers.laserfiche.com/questions/66717/LFAPI-and-Visual-Fox-Pro |
 | Laserfiche Server/Repository Server | 0x80040082 | An "Error 80040082" Error Occurs when Publishing a Packet with Multi-Page TIFF Reports. | medium | support-knowledge-base | https://support.laserfiche.com/kb/1011752/an-error-80040082-error-occurs-when-publishing-a-packet-with-multi-page-tiff-reports- |
