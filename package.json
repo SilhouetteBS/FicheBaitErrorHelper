@@ -39,7 +39,7 @@
     "verify:launch": "npm run test && npm run lint:data && npm run lint:public && npm run lint:launch && npm run quality && npm run progress && npm run housekeeping && npm run build && npm run smoke && npm run render:check"
   },
   "dependencies": {
-    "lucide-react": "^1.25.0",
+    "lucide-react": "^1.27.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
