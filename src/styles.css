@@ -691,22 +691,6 @@ h3 {
   color: var(--accent-dark);
 }
 
-.detail-actions .answers-primary-action {
-  min-height: 34px;
-  border: 1px solid var(--link);
-  border-radius: 5px;
-  padding: 6px 9px;
-  color: #ffffff;
-  background: var(--link);
-}
-
-.detail-actions .answers-primary-action:hover,
-.detail-actions .answers-primary-action:focus-visible {
-  border-color: var(--accent-dark);
-  color: #ffffff;
-  background: var(--accent-dark);
-}
-
 .detail-actions button:hover,
 .detail-actions button:focus-visible,
 .detail-actions a:hover,
