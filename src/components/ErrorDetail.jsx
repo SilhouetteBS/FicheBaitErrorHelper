@@ -3,7 +3,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   BookOpen,
-  Check,
+  ChevronRight,
   ExternalLink,
   MessageSquarePlus,
   MessageSquareReply,
@@ -12,7 +12,6 @@ import {
   Wrench,
 } from "lucide-react";
 import { answersContributionTargets, isAnswersUrl } from "../answersContribution.js";
-import { sourcePriority, sourceTypeOptions } from "../data/catalogMetadata.js";
 import { normalizeCode } from "../search.js";
 import {
   fixStatusMetadata,
@@ -44,10 +43,6 @@ function candidateReviewSummary(entryId, reviewsByEntry) {
   const accepted = reviews.filter((review) => review.disposition.startsWith("accepted-")).length;
   if (accepted > 0) return { label: "Candidate source found", className: "candidate-found", count: accepted };
   return { label: "Candidate reviewed", className: "candidate-reviewed", count: reviews.length };
-}
-
-function sourceTypeLabel(sourceType) {
-  return sourceTypeOptions.find((option) => option.value === sourceType)?.label ?? sourceType;
 }
 
 function correctionIssueUrl(entry) {
@@ -114,10 +109,109 @@ function ScenarioList({ title, items = [], ordered = false }) {
   );
 }
 
+function resolutionPaths(entry) {
+  if (!entry.scenarios?.length) {
+    return [{
+      title: "General troubleshooting guidance",
+      summary: "Entry-level guidance synthesized from the reviewed evidence listed with this path.",
+      versions: entry.versions,
+      symptoms: [],
+      causes: [],
+      fixes: entry.likelyFixes,
+      sources: entry.sources,
+      general: true,
+    }];
+  }
+
+  const scenarioPaths = entry.scenarios.map((scenario) => ({
+    ...scenario,
+    versions: scenario.versions?.length ? scenario.versions : entry.versions,
+    sources: (scenario.sourceUrls ?? [])
+      .map((url) => entry.sources.find((source) => source.url === url))
+      .filter(Boolean),
+  }));
+
+  return [
+    ...scenarioPaths,
+    {
+      title: "General diagnostic checklist",
+      summary: "Cross-scenario guidance retained from the entry-level research. Review the evidence before applying a step to a specific environment.",
+      versions: entry.versions,
+      symptoms: [],
+      causes: [],
+      fixes: entry.likelyFixes,
+      sources: entry.sources,
+      general: true,
+    },
+  ];
+}
+
+function PathEvidence({ sources, reviewedSources, onContribute, title = "Evidence for this path" }) {
+  if (!sources.length) return <p className="path-evidence-empty">No path-specific source has been assigned yet.</p>;
+
+  return (
+    <div className="path-evidence">
+      {title && <strong>{title}</strong>}
+      <div className="path-evidence-list">{sources.map((sourceItem, index) => (
+        <div className="path-evidence-row" key={`${sourceItem.url}-${index}`}>
+          <span className="evidence-index">[{index + 1}]</span>
+          <a href={sourceItem.url} rel="noreferrer" target="_blank">
+            <span>{sourceItem.title}</span><ExternalLink aria-hidden="true" size={15} />
+          </a>
+          <span className="source-card-meta">
+            <SourceBadge sourceType={sourceItem.sourceType} />
+            <ReviewStatusBadge value={reviewedSources.get(sourceItem.url) ?? "curated"} />
+          </span>
+          {isAnswersUrl(sourceItem.url) && (
+            <button
+              className="answers-contribution-button"
+              onClick={() => onContribute(sourceItem)}
+              type="button"
+            >
+              <MessageSquareReply aria-hidden="true" size={15} />Share outcome
+            </button>
+          )}
+        </div>
+      ))}</div>
+    </div>
+  );
+}
+
+function ResolutionPath({ path, defaultOpen, reviewedSources, onContribute }) {
+  const body = (
+    <div className="resolution-path-body">
+      <div className="resolution-columns">
+        <ScenarioList title="Matching Symptoms" items={path.symptoms} />
+        <ScenarioList title="Likely Causes" items={path.causes} />
+        <ScenarioList title="Fixes / Next Steps" items={path.fixes} ordered />
+      </div>
+      <PathEvidence
+        onContribute={(source) => onContribute(source, path.general ? null : path)}
+        reviewedSources={reviewedSources}
+        sources={path.sources}
+      />
+    </div>
+  );
+
+  const heading = (
+    <>
+      <span><strong>{path.title}</strong>{path.summary && <small>{path.summary}</small>}</span>
+      {path.versions?.length > 0 && <span className="resolution-versions">Applies to: {path.versions.join(", ")}</span>}
+    </>
+  );
+
+  if (defaultOpen) {
+    return <section className="resolution-path open"><div className="resolution-path-heading">{heading}</div>{body}</section>;
+  }
+
+  return <details className="resolution-path"><summary className="resolution-path-heading">{heading}<ChevronRight aria-hidden="true" className="resolution-toggle" size={18} /></summary>{body}</details>;
+}
+
 export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidateReviews, onSelect, onShare, onBack }) {
   const [contributionTarget, setContributionTarget] = useState(null);
   const candidateSummary = candidateReviewSummary(entry.id, sourceCandidateReviews);
   const contributionTargets = answersContributionTargets(entry);
+  const paths = resolutionPaths(entry);
   const sameCodeEntries = allEntries
     .filter((candidate) => candidate.id !== entry.id && normalizeCode(candidate.code) === normalizeCode(entry.code))
     .sort((a, b) => a.product.localeCompare(b.product) || fixStatusValue(a).localeCompare(fixStatusValue(b)) || a.message.localeCompare(b.message))
@@ -157,116 +251,56 @@ export function ErrorDetail({ entry, allEntries, reviewedSources, sourceCandidat
           </div>
         </div>
         <p className="error-description">{entry.message}</p>
-        <div className="meta-strip">
-          <span><strong>Product</strong>{entry.product}</span>
-          <span><strong>Versions</strong>{entry.versions.join(", ")}</span>
-          <span><strong>Last Reviewed</strong>{entry.reviewedDate}</span>
+        <div className="entry-facts">
+          <div><strong>Product</strong><span>{entry.product}</span></div>
+          <div><strong>Versions</strong><span>{entry.versions.join(", ")}</span></div>
+          <div><strong>Last Reviewed</strong><span>{entry.reviewedDate}</span></div>
+          <div>
+            <strong className="with-tooltip">Source Confidence<TooltipIcon text="Confidence is based on source authority, whether a Laserfiche employee replied, and whether the fix was confirmed." /></strong>
+            <ConfidenceBadge value={entry.confidence} />
+          </div>
+          <div>
+            <strong className="with-tooltip">Fix Status<TooltipIcon text="Known fix means a source confirms a fix. Workaround means source-backed remediation exists but may not be permanent. Diagnostic only and unresolved entries are useful for discovery but need more evidence." /></strong>
+            <FixStatusBadge value={fixStatusValue(entry)} />
+          </div>
+          <div>
+            <strong className="with-tooltip">Validation Status<TooltipIcon text="Validation status tracks research maturity for this helper. It does not mean the Laserfiche error itself is invalid or unsupported." /></strong>
+            <span className={`validation-status ${entry.validationStatus ?? "not-triaged"}`}>{statusLabel(validationStatusMetadata, entry.validationStatus, "Not triaged")}</span>
+          </div>
         </div>
+        <p className="entry-summary">{entry.summary}</p>
         <DetailSection title="Symptoms" icon={Stethoscope}>
           <ul>{entry.symptoms.map((symptom) => <li key={symptom}>{symptom}</li>)}</ul>
         </DetailSection>
-        <DetailSection title="Likely Fixes" icon={Wrench} tooltip="These are source-backed or diagnostic next steps. Validate them in a test or maintenance window before changing production.">
-          <ol>{entry.likelyFixes.map((fix) => <li key={fix}>{fix}</li>)}</ol>
-        </DetailSection>
-        {entry.scenarios?.length > 0 && (
-          <DetailSection title="Possible Scenarios">
-            <div className="scenario-list">
-              {entry.scenarios.map((scenario) => (
-                <section className="scenario-card" key={scenario.title}>
-                  <div className="scenario-heading">
-                    <div><h4>{scenario.title}</h4>{scenario.summary && <p>{scenario.summary}</p>}</div>
-                    {scenario.versions?.length > 0 && <span className="scenario-versions">{scenario.versions.join(", ")}</span>}
-                  </div>
-                  <ScenarioList title="Symptoms" items={scenario.symptoms} />
-                  <ScenarioList title="Likely Causes" items={scenario.causes} />
-                  <ScenarioList title="Fixes / Next Steps" items={scenario.fixes} ordered />
-                  {scenario.sourceUrls?.length > 0 && (
-                    <div className="scenario-sources">
-                      <strong>Scenario sources</strong>
-                      <ul>{scenario.sourceUrls.map((url) => {
-                        const sourceItem = entry.sources.find((source) => source.url === url);
-                        return (
-                          <li key={url}>
-                            <a href={url} rel="noreferrer" target="_blank">{sourceItem?.title ?? url}</a>
-                            {isAnswersUrl(url) && (
-                              <button
-                                className="answers-contribution-button"
-                                onClick={() => setContributionTarget([{ source: sourceItem ?? { title: url, url }, scenario }])}
-                                type="button"
-                              >
-                                <MessageSquareReply aria-hidden="true" size={15} />Share outcome
-                              </button>
-                            )}
-                          </li>
-                        );
-                      })}</ul>
-                    </div>
-                  )}
-                </section>
-              ))}
-            </div>
-          </DetailSection>
-        )}
-      </div>
-
-      <aside className="detail-sidebar" aria-label="Evidence and source details">
-        <section className="side-card">
-          <h3 className="with-tooltip">Source Confidence<TooltipIcon text="Confidence is based on source authority, whether a Laserfiche employee replied, and whether the fix was confirmed." /></h3>
-          <ConfidenceBadge value={entry.confidence} /><p>{entry.summary}</p>
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">Fix Status<TooltipIcon text="Known fix means a source confirms a fix. Workaround means source-backed remediation exists but may not be permanent. Diagnostic only and unresolved entries are useful for discovery but need more evidence." /></h3>
-          <FixStatusBadge value={fixStatusValue(entry)} />
-          <p>{({
-            "known-fix": "A source-backed fix is documented for at least one matching scenario.",
-            workaround: "A source-backed workaround is documented, but it may not be a permanent product fix.",
-            "diagnostic-only": "Sources provide troubleshooting direction, but no single confirmed fix is documented.",
-            unresolved: "The error is documented, but no confirmed public fix has been identified yet.",
-            "needs-review": "This entry needs additional source review before a fix status can be assigned.",
-          })[fixStatusValue(entry)]}</p>
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">Validation Status<TooltipIcon text="Validation status tracks research maturity for this helper. It does not mean the Laserfiche error itself is invalid or unsupported." /></h3>
-          <span className={`validation-status ${entry.validationStatus ?? "not-triaged"}`}>{statusLabel(validationStatusMetadata, entry.validationStatus, "Not triaged")}</span>
-          <p>{validationStatusMetadata[entry.validationStatus]?.description ?? "This entry has not been included in a validation triage pass yet."}</p>
-          {candidateSummary && <p>{candidateSummary.count} reviewed candidate source{candidateSummary.count === 1 ? "" : "s"} matched this entry.</p>}
-        </section>
-        <section className="side-card">
-          <h3 className="with-tooltip">Source Priority<TooltipIcon text="Official docs rank first, Laserfiche employee Answers posts rank next, and community-confirmed sources rank after that." /></h3>
-          <ol className="priority-list">{[...entry.sources]
-            .sort((a, b) => (sourcePriority[a.sourceType] ?? 99) - (sourcePriority[b.sourceType] ?? 99))
-            .map((sourceItem) => <li key={`${sourceItem.sourceType}-${sourceItem.title}`}><span>{sourceTypeLabel(sourceItem.sourceType)}</span><span className="check-dot"><Check aria-hidden="true" size={11} strokeWidth={3.5} /></span></li>)}</ol>
-        </section>
-        <section className="side-card">
-          <h3>Links to Sources</h3>
-          <div className="source-list">{entry.sources.map((sourceItem, index) => (
-            <div className="source-card-row" key={`${sourceItem.sourceType}-${sourceItem.url}-${index}`}>
-              <a className="source-card" href={sourceItem.url} rel="noreferrer" target="_blank">
-                <span className="source-card-content"><span>{sourceItem.title}</span><span className="source-card-meta"><SourceBadge sourceType={sourceItem.sourceType} /><ReviewStatusBadge value={reviewedSources.get(sourceItem.url) ?? "curated"} /></span></span>
-                <ExternalLink aria-hidden="true" size={16} />
-              </a>
-              {isAnswersUrl(sourceItem.url) && (
-                <button
-                  className="answers-contribution-button"
-                  onClick={() => setContributionTarget([{ source: sourceItem, scenario: null }])}
-                  type="button"
-                >
-                  <MessageSquareReply aria-hidden="true" size={15} />Share outcome on Answers
-                </button>
-              )}
-            </div>
+        <DetailSection title="Resolution Paths" icon={Wrench} tooltip="Each path groups symptoms, causes, fixes, and the reviewed evidence that applies to that troubleshooting context.">
+          <div className="resolution-list">{paths.map((path, index) => (
+            <ResolutionPath
+              defaultOpen={index === 0}
+              key={`${path.title}-${index}`}
+              onContribute={(source, scenario) => setContributionTarget([{ source, scenario }])}
+              path={path}
+              reviewedSources={reviewedSources}
+            />
           ))}</div>
-        </section>
+        </DetailSection>
+        <details className="all-reviewed-sources">
+          <summary>All Reviewed Sources <span>{entry.sources.length}</span></summary>
+          <PathEvidence
+            onContribute={(source) => setContributionTarget([{ source, scenario: null }])}
+            reviewedSources={reviewedSources}
+            sources={entry.sources}
+            title=""
+          />
+        </details>
         {sameCodeEntries.length > 0 && (
-          <section className="side-card">
-            <h3 className="with-tooltip">Same Code, Other Contexts<TooltipIcon text="The same numeric or product code can have different causes and fixes depending on product, version, and source context." /></h3>
+          <DetailSection title="Same Code, Other Contexts" tooltip="The same numeric or product code can have different causes and fixes depending on product, version, and source context.">
             <div className="same-code-list">{sameCodeEntries.map((relatedEntry) => (
               <button key={relatedEntry.id} onClick={() => onSelect(relatedEntry.id)} type="button"><span><strong>{relatedEntry.product}</strong>{relatedEntry.message}</span><FixStatusBadge value={fixStatusValue(relatedEntry)} /></button>
             ))}</div>
-          </section>
+          </DetailSection>
         )}
         {entry.notes && <div className="caution"><AlertTriangle aria-hidden="true" size={18} /><p>{entry.notes}</p></div>}
-      </aside>
+      </div>
       {contributionTarget && (
         <AnswersContributionDialog
           correctionUrl={correctionIssueUrl(entry)}

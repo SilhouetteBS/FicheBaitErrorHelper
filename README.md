@@ -16,9 +16,10 @@ rights, attribution, and research-data handling.
 
 - Searches official Laserfiche documentation entries and reviewed Laserfiche Answers sources.
 - Groups errors by product and shows version context when available.
-- Labels source confidence, fix status, validation status, and source priority.
+- Groups troubleshooting guidance into resolution paths with the evidence reviewed for each path.
+- Labels source confidence, fix status, and validation status in a compact entry summary.
 - Keeps diagnostic-only and official-doc baseline entries visible for discovery.
-- Links every entry back to reviewed sources.
+- Links every resolution path and entry back to its reviewed sources.
 - Supports correction reports through GitHub issue templates.
 
 ## Current Launch Snapshot
@@ -33,7 +34,7 @@ See `docs/known-limitations.md` for the current limitations and safety notes.
 
 1. Search by error code, message text, product, symptom, or source detail.
 2. Check the product, version, source confidence, fix status, and validation status.
-3. Open the linked source before applying a fix.
+3. Review the evidence listed with a resolution path before applying a fix.
 4. Validate changes in a test or maintenance window before changing production.
 5. Treat database, IIS, certificate, service-account, and security-baseline changes as change-controlled work.
 

@@ -70,6 +70,7 @@ export function InfoDialog({ type, usageStats, qualitySummary, onClose }) {
             <ol>
               <li>Official documentation establishes the baseline error code and product context.</li>
               <li>Answers posts add scenario-specific symptoms, fixes, and version notes.</li>
+              <li>Resolution paths keep troubleshooting steps together with the evidence reviewed for that context.</li>
               <li>Laserfiche employee replies are prioritized above community-only guidance.</li>
               <li>Answers-backed sources let users generate a structured outcome reply for the original discussion.</li>
               <li>Unresolved entries stay visible when they document an error but no confirmed fix exists yet.</li>

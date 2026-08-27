@@ -149,7 +149,16 @@ try {
   await page.goBack();
   await expectVisible(page.getByText("Get started"), "Browser Back did not clear the selected error.");
   await page.goForward();
-  await expectVisible(page.getByText("Likely Fixes"), "Browser Forward did not restore the selected error.");
+  await expectVisible(page.getByText("Resolution Paths"), "Browser Forward did not restore the selected error.");
+  await expectVisible(page.getByText("Source Confidence", { exact: true }), "Compact Source Confidence field was not visible.");
+  await expectVisible(page.getByText("All Reviewed Sources", { exact: false }), "Collapsed reviewed-source section was not visible.");
+  if (await page.locator(".detail-sidebar").count()) throw new Error("Legacy detail sidebar is still rendered.");
+  await expectVisible(page.locator(".resolution-path.open .path-evidence-row").first(), "The open resolution path did not show linked evidence.");
+  const selectedDetailAccessibility = await new AxeBuilder({ page }).include(".detail-pane").analyze();
+  const seriousSelectedDetailIssues = selectedDetailAccessibility.violations.filter((issue) => ["serious", "critical"].includes(issue.impact));
+  if (seriousSelectedDetailIssues.length) {
+    throw new Error(`Selected detail accessibility violations: ${seriousSelectedDetailIssues.flatMap((issue) => issue.nodes.map((node) => `${issue.id} (${node.target.join(" ")})`)).join(", ")}`);
+  }
 
   await page.getByLabel("Product", { exact: true }).selectOption("Forms");
   await expectVisible(page.getByText("Get started"), "Filtering out the selected entry did not clear the detail pane.");
@@ -164,7 +173,7 @@ try {
   );
   if (faviconStatus !== 200) throw new Error(`Favicon returned HTTP ${faviconStatus}.`);
   await page.goto(`${baseUrl}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
-  await expectVisible(page.getByText("Likely Fixes"), "Direct error link did not hydrate its product detail module.");
+  await expectVisible(page.getByText("Resolution Paths"), "Direct error link did not hydrate its product detail module.");
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileBack = page.getByRole("button", { name: "Back to results" });
   await expectVisible(mobileBack, "Mobile error detail did not provide a Back to results action.");

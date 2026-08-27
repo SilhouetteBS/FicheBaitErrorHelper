@@ -8,8 +8,10 @@ import { browserLaunchOptions } from "./browser-launch.mjs";
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const desktopScreenshot = resolve(rootDir, "dist", "render-check.png");
 const answersDialogScreenshot = resolve(rootDir, "dist", "render-check-answers-dialog.png");
+const resolutionPathsScreenshot = resolve(rootDir, "dist", "render-check-resolution-paths.png");
 const longTitleScreenshot = resolve(rootDir, "dist", "render-check-long-title.png");
 const mobileScreenshot = resolve(rootDir, "dist", "render-check-mobile.png");
+const mobileResolutionPathsScreenshot = resolve(rootDir, "dist", "render-check-mobile-resolution-paths.png");
 const mobileAnswersDialogScreenshot = resolve(rootDir, "dist", "render-check-mobile-answers-dialog.png");
 const longTitleEntryId =
   "support-promoted-1014518-forms-forms-improving-performance-in-laserfich-improving-performance-in-laserfiche-forms-versions-10-3-1-onward";
@@ -43,9 +45,9 @@ try {
   if ((await resultGroup.getAttribute("aria-expanded")) !== "true") await resultGroup.click();
   await page.getByRole("button", { name: /9030 Maximum sessions or licensing limit reached/ }).click();
   await page.waitForURL(/error=/);
-  await page.getByText("Likely Fixes").waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByText("Resolution Paths").waitFor({ state: "visible", timeout: 10_000 });
   await page.screenshot({ path: desktopScreenshot, fullPage: false });
-  const visible = await page.getByText("Likely Fixes").isVisible();
+  const visible = await page.getByText("Resolution Paths").isVisible();
   await page.getByRole("button", { name: "Contribute on Answers", exact: true }).click();
   const answersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
   await answersDialog.waitFor({ state: "visible", timeout: 10_000 });
@@ -55,6 +57,12 @@ try {
     return bounds.left < 0 || bounds.top < 0 || bounds.right > window.innerWidth || bounds.bottom > window.innerHeight;
   });
   await page.keyboard.press("Escape");
+  await page.goto(`${url}?error=lf-server-9013-access-denied`, { waitUntil: "networkidle" });
+  const scenarioPaths = page.locator(".resolution-path");
+  await scenarioPaths.first().waitFor({ state: "visible", timeout: 10_000 });
+  const scenarioPathCount = await scenarioPaths.count();
+  const firstPathEvidenceCount = await scenarioPaths.first().locator(".path-evidence-row").count();
+  await page.screenshot({ path: resolutionPathsScreenshot, fullPage: false });
   await page.goto(`${url}?error=${longTitleEntryId}`, { waitUntil: "networkidle" });
   const longTitle = page.getByRole("heading", { name: "FORMS-IMPROVING_PERFORMANCE_IN_LASERFICH" });
   await longTitle.waitFor({ state: "visible", timeout: 10_000 });
@@ -82,6 +90,12 @@ try {
   await page.getByRole("button", { name: "Back to results" }).waitFor({ state: "visible" });
   await page.screenshot({ path: mobileScreenshot, fullPage: false });
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  await page.goto(`${url}?error=lf-server-9013-access-denied`, { waitUntil: "networkidle" });
+  const mobileResolutionPath = page.locator(".resolution-path.open");
+  await mobileResolutionPath.waitFor({ state: "visible", timeout: 10_000 });
+  await mobileResolutionPath.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: mobileResolutionPathsScreenshot, fullPage: false });
+  const mobileResolutionOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await page.goto(`${url}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Contribute on Answers", exact: true }).click();
   const mobileAnswersDialog = page.getByRole("dialog", { name: "Share a troubleshooting outcome" });
@@ -90,15 +104,17 @@ try {
   const mobileDialogOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await browser.close();
   browser = null;
-  if (!visible) throw new Error("Detail pane did not render expected troubleshooting section.");
+  if (!visible) throw new Error("Detail pane did not render expected resolution-path section.");
+  if (scenarioPathCount < 2 || firstPathEvidenceCount < 1) throw new Error("Scenario entry did not render source-linked resolution paths.");
   if (desktopDialogOverflow) throw new Error("Answers contribution dialog exceeds the desktop viewport.");
   if (desktopLongTitleOverflow) throw new Error("Long error title overflows the desktop detail column.");
   if (!desktopPaneScroll.valid || !desktopPaneScroll.detailStayedAligned || !desktopPaneScroll.pageStayedPut) {
     throw new Error("Desktop result scrolling does not keep the detail pane aligned.");
   }
   if (mobileOverflow) throw new Error("Mobile viewport has horizontal overflow.");
+  if (mobileResolutionOverflow) throw new Error("Mobile resolution paths cause horizontal overflow.");
   if (mobileDialogOverflow) throw new Error("Answers contribution dialog causes mobile horizontal overflow.");
-  if (!existsSync(desktopScreenshot) || !existsSync(answersDialogScreenshot) || !existsSync(longTitleScreenshot) || !existsSync(mobileScreenshot) || !existsSync(mobileAnswersDialogScreenshot)) {
+  if (!existsSync(desktopScreenshot) || !existsSync(answersDialogScreenshot) || !existsSync(resolutionPathsScreenshot) || !existsSync(longTitleScreenshot) || !existsSync(mobileScreenshot) || !existsSync(mobileResolutionPathsScreenshot) || !existsSync(mobileAnswersDialogScreenshot)) {
     throw new Error("Render check screenshots were not written.");
   }
   if (consoleErrors.length > 0) throw new Error(`Console errors: ${consoleErrors.join("; ")}`);
