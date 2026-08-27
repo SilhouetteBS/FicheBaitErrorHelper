@@ -1,10 +1,10 @@
 # Support KB Research Status
 
-Generated: 2026-07-19T21:33:36.629Z
+Generated: 2026-08-27T13:26:06.665Z
 
 Visited Support KB URLs: 542
 Promoted Support KB entries: 313
-Support KB reviewed-source rows: 542
+Support KB reviewed-source rows: 541
 Search batches captured: 22
 
 ## Open Search Cursors

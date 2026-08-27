@@ -1,6 +1,6 @@
 # Support KB Research Batch Summary
 
-Generated: 2026-07-19T21:33:36.630Z
+Generated: 2026-08-27T13:26:06.665Z
 
 This sanitized index summarizes private Support KB search batches without publishing captured page content.
 

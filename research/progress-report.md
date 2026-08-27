@@ -1,11 +1,11 @@
 # FicheBait Error Helper Progress Report
 
-Generated: 2026-07-19
+Generated: 2026-08-27
 
 ## Summary
 
-- Published helper entries: 2334
-- Reviewed source ledger rows: 1556
+- Published helper entries: 2337
+- Reviewed source ledger rows: 1562
 - Discovery rows tracked: 4081
 - Remaining candidate rows: 71
 
@@ -13,8 +13,8 @@ Generated: 2026-07-19
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 357 |
-| known-fix | 120 |
+| diagnostic-only | 358 |
+| known-fix | 122 |
 | needs-review | 1533 |
 | workaround | 324 |
 
@@ -23,9 +23,9 @@ Generated: 2026-07-19
 | Review status | Sources |
 | --- | --- |
 | cross-product | 65 |
-| curated | 425 |
-| curated-partial | 447 |
-| curated-unresolved | 613 |
+| curated | 429 |
+| curated-partial | 450 |
+| curated-unresolved | 612 |
 | no-matching-posts | 2 |
 | not-actionable | 4 |
 
@@ -34,10 +34,10 @@ Generated: 2026-07-19
 | Source type | Sources |
 | --- | --- |
 | answers-community | 71 |
-| answers-community-confirmed | 556 |
-| answers-laserfiche-employee | 282 |
+| answers-community-confirmed | 560 |
+| answers-laserfiche-employee | 283 |
 | answers-search | 70 |
-| official-docs | 16 |
+| official-docs | 17 |
 | support-knowledge-base | 561 |
 
 ## Product Coverage
@@ -49,12 +49,12 @@ Generated: 2026-07-19
 | API Server | 16 | 0 |
 | Audit Trail | 30 | 4 |
 | Common Dialog | 9 | 0 |
-| Connector | 19 | 3 |
-| Directory Server | 106 | 3 |
+| Connector | 20 | 3 |
+| Directory Server | 107 | 3 |
 | Discussions | 7 | 0 |
 | Distributed Computing Cluster | 11 | 0 |
 | Federated Search | 7 | 0 |
-| Forms | 144 | 4 |
+| Forms | 145 | 4 |
 | Full Text Search | 17 | 0 |
 | Import Agent | 33 | 3 |
 | Laserfiche Installer | 48 | 1 |

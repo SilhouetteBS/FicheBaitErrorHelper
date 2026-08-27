@@ -12338,23 +12338,85 @@ const curatedErrorEntries = [
   },
   {
     id: "forms-10061-the-requested-service-iroutingengineservice-may-not-be-running",
-    code: "10061",
-    message: "The requested service (IRoutingEngineService) may not be running.",
+    code: "10061 / LFF3004-UnableToOpenServiceProxy",
+    message: "The requested service 'IRoutingEngineService' may not be running.",
     product: "Forms",
-    versions: ["Version 9", "Version 10", "Version 11"],
-    confidence: "low",
-    fixStatus: "diagnostic-only",
-    reviewedDate: "2026-06-28",
-    summary: "Forms can report 10061 in the reviewed Answers source \"The requested service (IRoutingEngineService) may not be running.\"; no single confirmed public fix has been isolated yet.",
-    symptoms: ["The reviewed source reports 10061.", "The requested service (IRoutingEngineService) may not be running."],
-    likelyFixes: ["Review the Forms event logs using the business process ID, instance ID, URL, and HTTP status from the error details.", "Check recent process design, service task, lookup, routing, licensing, attachment, and repository-connection changes.", "Use the linked Answers source as the starting point for 10061; this entry is documented for discovery even though no universal fix is confirmed.", "Review the Laserfiche application logs, Windows Event Viewer, and the affected instance/request timestamp for the first underlying exception."],
+    versions: ["Version 10", "Version 11", "Version 12"],
+    confidence: "high",
+    fixStatus: "known-fix",
+    validationStatus: "reviewed-diagnostic",
+    reviewedDate: "2026-08-19",
+    summary:
+      "UserSyncClient can report LFF3004 even while the Forms Routing Service is running when the client's lfrouting endpoint or netTcpBinding security mode does not match the Routing Service configuration. A matching security mode restored the client in a verified Forms 11 case.",
+    symptoms: [
+      "UserSyncClient.exe reports that IRoutingEngineService may not be running and exits before starting synchronization.",
+      "The Laserfiche Forms Routing Service may already be running and listening on the configured lfrouting port, commonly 8168.",
+      "The client endpoint may be net.tcp://localhost:8168/lfrouting while the UserSyncClient timeoutBinding security mode differs from RoutingEngineServiceHost.exe.config.",
+    ],
+    likelyFixes: [
+      "Run UserSyncClient.exe from the Forms\\bin installation folder on the internal Forms server that hosts the active Forms Routing Service; do not copy the executable elsewhere.",
+      "Confirm the Laserfiche Forms Routing Service is running and that the lfrouting endpoint port is listening before changing configuration.",
+      "Back up UserSyncClient.exe.config, then compare its lfrouting endpoint and timeoutBinding security mode with RoutingEngineServiceHost.exe.config.",
+      "If the client binding does not match the service binding, change only the mismatched client value so it matches. In the verified case, the service used <security mode=\"None\" /> while the client used Transport, and setting the client to None restored synchronization.",
+      "Run UserSyncClient.exe again and confirm that it displays 'User synchronization in progress' and completes its added/modified user counts.",
+      "If the values already match, do not change security mode. Check the endpoint host and port, firewall path, URL reservations, service startup errors, and the inner WCF exception instead.",
+    ],
+    scenarios: [
+      {
+        title: "UserSyncClient binding does not match the active Routing Service",
+        versions: ["Version 11"],
+        summary:
+          "The service can be healthy and listening, but WCF still rejects the UserSyncClient connection when the client and service use different netTcpBinding security modes.",
+        symptoms: [
+          "IRoutingEngineService returns LFF3004 from UserSyncClient.exe.",
+          "The Routing Service process owns the lfrouting listening port.",
+          "UserSyncClient.exe.config and RoutingEngineServiceHost.exe.config specify different security modes for timeoutBinding.",
+        ],
+        causes: [
+          "The UserSyncClient configuration was left with a binding security mode that differs from the active Routing Service configuration, such as Transport on the client and None on the service.",
+        ],
+        fixes: [
+          "Make a dated backup of Forms\\bin\\UserSyncClient.exe.config.",
+          "Compare the timeoutBinding security mode and the net.tcp lfrouting endpoint in UserSyncClient.exe.config with RoutingEngineServiceHost.exe.config.",
+          "Edit UserSyncClient.exe.config only when a mismatch is confirmed, and make the client match the service. Do not assume that None is correct in every deployment.",
+          "Launch UserSyncClient.exe from Forms\\bin and verify that synchronization starts and reports results.",
+          "After a Forms repair or upgrade, recheck the file because the installer may replace local configuration changes.",
+        ],
+        sourceUrls: [
+          "https://answers.laserfiche.com/questions/127258/The-requested-service-IRoutingEngineService-may-not-be-running",
+          "https://answers.laserfiche.com/questions/149968/The-requested-service-iAutoTrigger-may-not-be-running",
+          "https://answers.laserfiche.com/questions/97867/Whitepaper-on-Forms-in-DMZ-config-appears-to-be-missing-an-item?sort=newest",
+          "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/config-forms-user-sync-client.htm",
+        ],
+      },
+    ],
+    notes:
+      "This is a conditional configuration fix, not a recommendation to disable transport security. Match the active Routing Service. In a split DMZ deployment, UserSyncClient belongs on the internal Forms server; do not apply this client-file change to an IIS-only DMZ server whose Routing Service is intentionally stopped.",
     sources: [
       {
         sourceType: "answers-community-confirmed",
         title: "The requested service (IRoutingEngineService) may not be running.",
         url: "https://answers.laserfiche.com/questions/127258/The-requested-service-IRoutingEngineService-may-not-be-running",
-        note: "Auto-promoted diagnostic entry from the remaining Answers candidate queue for 10061."
-      }
+        note: "The exact LFF3004 IRoutingEngineService error is documented; replies identify service startup checks and the Primary Forms Server URL as possible causes.",
+      },
+      {
+        sourceType: "answers-community-confirmed",
+        title: "The requested service (iAutoTrigger) may not be running.",
+        url: "https://answers.laserfiche.com/questions/149968/The-requested-service-iAutoTrigger-may-not-be-running",
+        note: "A selected answer confirms that correcting a Transport-versus-None security-mode mismatch resolved the same LFF3004 service-proxy error class.",
+      },
+      {
+        sourceType: "answers-community-confirmed",
+        title: "Whitepaper on Forms in DMZ config appears to be missing an item",
+        url: "https://answers.laserfiche.com/questions/97867/Whitepaper-on-Forms-in-DMZ-config-appears-to-be-missing-an-item?sort=newest",
+        note: "Documents the lfrouting endpoint in UserSyncClient.exe.config and confirms that the client runs on the internal Forms server rather than the DMZ server.",
+      },
+      {
+        sourceType: "official-docs",
+        title: "Laserfiche 12 User Guide: User Synchronization",
+        url: "https://doc.laserfiche.com/laserfiche.documentation/12/userguide/en-us/content/config-forms-user-sync-client.htm",
+        note: "Official instructions place UserSyncClient.exe in Forms\\bin and warn not to copy it elsewhere because it depends on files in that folder.",
+      },
     ]
   },
   {
@@ -21670,6 +21732,169 @@ const curatedErrorEntries = [
     ],
   },
   {
+    id: "formsconfig-sql-login-failed-app-pool-identity",
+    code: "FORMSCONFIG-SQL-LOGIN-FAILED-APPPOOL",
+    message: "Login failed for user 'DOMAIN\\SERVERNAME$'.",
+    product: "Forms",
+    versions: ["Version 12"],
+    confidence: "medium",
+    fixStatus: "known-fix",
+    reviewedDate: "2026-08-26",
+    summary:
+      "FormsConfig can surface a SQL login failure for the server computer account when its IIS application pool is running under an unintended identity; the reporter restored access by correcting the application pool identity.",
+    symptoms: [
+      "Browsing to /FormsConfig returns a SQL login failure for DOMAIN\\SERVERNAME$.",
+      "The message does not identify whether the failing identity belongs to a Windows service or an IIS application pool.",
+      "The problem appears after installing or upgrading Laserfiche Forms 12.",
+    ],
+    likelyCauses: [
+      "The FormsConfig IIS application pool is running under the server computer account or another unintended identity.",
+      "The configured application pool identity does not have the SQL access expected by the Forms deployment.",
+    ],
+    likelyFixes: [
+      "Identify the IIS application pool serving FormsConfig and verify its configured identity against the intended Forms service account design.",
+      "Correct the application pool identity, recycle the pool, and retest FormsConfig.",
+      "Use least-privilege SQL permissions for the intended identity; do not grant broad database rights to the computer account solely to suppress the message.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    notes:
+      "The reporter confirmed that correcting the IIS application pool identity restored access. A Laserfiche employee clarified that Forms does not control the wording of this lower-level SQL error.",
+    sources: [
+      {
+        sourceType: "answers-community-confirmed",
+        title: "Enhancement Request: Update Error if AppPool Identity Doesn't Have Rights",
+        url: "https://answers.laserfiche.com/questions/238108/Enhancement-Request-Update-Error-if-AppPool-Identity-Doesnt-Have-Rights",
+        note:
+          "The reporter confirmed that updating the FormsConfig application pool identity resolved the SQL login failure; a Laserfiche employee clarified the message is not controlled by Forms.",
+      },
+    ],
+  },
+  {
+    id: "lfdssts-windows-authentication-not-available-kerberos-alias",
+    code: "LFDSSTS-WINDOWS-AUTH-NOT-AVAILABLE",
+    message: "Windows authentication is not available.",
+    product: "Directory Server",
+    versions: ["Version 11"],
+    confidence: "medium",
+    fixStatus: "diagnostic-only",
+    reviewedDate: "2026-08-27",
+    summary:
+      "Windows authentication through LFDSSTS can fail when a DNS CNAME is used without the Kerberos SPNs required for the alias and NTLM is unavailable as a fallback.",
+    symptoms: [
+      "Users cannot sign in to Forms with Windows credentials through Directory Server STS.",
+      "Selecting Windows Authentication returns an error instead of completing sign-in.",
+      "The LFDSSTS site is accessed through a DNS alias and NTLM fallback is disabled or blocked.",
+    ],
+    likelyCauses: [
+      "A DNS CNAME points to LFDSSTS, but the alias does not have the Kerberos SPNs required for Windows authentication.",
+      "Kerberos fails and NTLM cannot provide fallback authentication.",
+    ],
+    likelyFixes: [
+      "Validate the LFDSSTS URL, DNS alias, service account, and Kerberos SPNs before changing authentication settings.",
+      "Where appropriate, replace a standalone CNAME with a Windows computer-name alias that configures both DNS and Kerberos behavior.",
+      "For Forms 11 upgrades, run the applicable Directory Server, Web STS, and Forms endpoint utilities and use each server's actual NetBIOS machine name for the endpoint host rather than a DNS alias.",
+      "Collect browser, IIS, and Windows Kerberos event evidence or open a Laserfiche Support case if the alias and SPNs cannot be validated safely.",
+    ],
+    scenarios: [
+      {
+        title: "LFDSSTS DNS alias lacks Kerberos SPNs",
+        summary:
+          "A DNS CNAME can leave LFDSSTS without the Kerberos SPNs required for Windows authentication when NTLM fallback is unavailable.",
+        versions: ["Version 11"],
+        symptoms: [
+          "Selecting Windows Authentication returns an availability error instead of completing sign-in.",
+          "The LFDSSTS site is accessed through a DNS alias.",
+        ],
+        causes: [
+          "The DNS alias does not have the Kerberos SPNs required for Windows authentication, and NTLM cannot provide fallback authentication.",
+        ],
+        fixes: [
+          "Validate the alias, service account, and Kerberos SPNs.",
+          "Where appropriate, replace a standalone CNAME with a Windows computer-name alias that configures both DNS and Kerberos behavior.",
+        ],
+        sourceUrls: [
+          "https://answers.laserfiche.com/questions/220582/windows-authentication-is-not-available",
+        ],
+      },
+      {
+        title: "Forms 11 endpoint utilities use a DNS alias",
+        summary:
+          "After a Forms and Directory Server 11 upgrade, Windows authentication can fail when endpoint utilities are configured with a DNS alias instead of the server's actual machine name.",
+        versions: ["Version 11"],
+        symptoms: [
+          "Forms displays: Windows Authentication is not available. Please type your Windows credentials below or try another login method.",
+          "The problem begins after upgrading Forms and Directory Server from 10.4 to 11.",
+        ],
+        causes: [
+          "One or more Directory Server, Web STS, Forms, or Web Client endpoint settings use a DNS alias or localhost instead of the actual server name.",
+        ],
+        fixes: [
+          "Run the applicable XMLEndpointUtility, WebSTS STSEndpointUtility, and product endpoint utility for the installed components.",
+          "Set endpoint hosts to the actual NetBIOS machine names; retain DNS aliases only in supported URLs and redirects.",
+          "Verify installed paths because endpoint utility locations differ by product and build.",
+        ],
+        sourceUrls: [
+          "https://answers.laserfiche.com/questions/202147/Forms-11-broke-Windows-Authentication",
+        ],
+      },
+    ],
+    validationStatus: "reviewed-diagnostic",
+    notes:
+      "Laserfiche employee guidance identifies Kerberos/SPN handling as one likely cause, but that reporter did not post a final confirmation. A separate accepted VAR answer documents the endpoint-utility machine-name scenario for a Forms 11 upgrade.",
+    sources: [
+      {
+        sourceType: "answers-laserfiche-employee",
+        title: "windows authentication is not available",
+        url: "https://answers.laserfiche.com/questions/220582/windows-authentication-is-not-available",
+        note:
+          "Samuel Carson from Laserfiche explains that a CNAME alone does not create the Kerberos SPNs needed for Windows authentication and suggests a computer-name alias.",
+      },
+      {
+        sourceType: "answers-community-confirmed",
+        title: "Forms 11 broke Windows Authentication",
+        url: "https://answers.laserfiche.com/questions/202147/Forms-11-broke-Windows-Authentication",
+        note:
+          "The accepted VAR answer says endpoint utilities must use actual NetBIOS machine names rather than DNS aliases; the requester acknowledged the updated resolution.",
+      },
+    ],
+  },
+  {
+    id: "connector-error-20097-wording-update",
+    code: "20097",
+    message: "Connector error message 20097",
+    product: "Connector",
+    versions: ["Version 11"],
+    confidence: "high",
+    fixStatus: "diagnostic-only",
+    reviewedDate: "2026-08-26",
+    summary:
+      "Laserfiche Connector 11 Update 3 changes the wording of error message 20097, but the public change list does not document the underlying trigger or reproduce the revised message text.",
+    symptoms: [
+      "Laserfiche Connector reports error 20097.",
+      "The wording may differ depending on whether Connector 11 Update 3 is installed.",
+    ],
+    likelyCauses: [
+      "The reviewed public source confirms the error identifier but does not identify its underlying cause.",
+    ],
+    likelyFixes: [
+      "Install Laserfiche Connector 11 Update 3 when appropriate to receive the revised error wording.",
+      "Record the complete revised message and Connector build number before troubleshooting the underlying failure.",
+      "Open a Laserfiche Support case when the revised message and logs do not identify an actionable cause.",
+    ],
+    validationStatus: "reviewed-diagnostic",
+    notes:
+      "Update 3 improves the message wording; the source does not state that the update resolves the condition that produces error 20097.",
+    sources: [
+      {
+        sourceType: "support-knowledge-base",
+        title: "List of Changes for Laserfiche Connector 11 Update 3",
+        url: "https://support.laserfiche.com/kb/1014585/list-of-changes-for-laserfiche-connector-11-update-3",
+        note:
+          "Laserfiche Support KB1014585 states that Connector 11 Update 3 updates the wording for error message 20097 (issue 656797).",
+      },
+    ],
+  },
+  {
     id: "support-kb-1014263-installer-mounted-iso-disk-error",
     code: "INSTALLER-MOUNTED-ISO-DISK-ERROR",
     message: "Installer may report an error finding a disk during upgrades from a mounted ISO",
@@ -21677,7 +21902,7 @@ const curatedErrorEntries = [
     versions: ["Version 11"],
     confidence: "high",
     fixStatus: "workaround",
-    reviewedDate: "2026-07-01",
+    reviewedDate: "2026-08-26",
     summary:
       "The Laserfiche Server installer can report an error finding a disk during upgrades when it is run directly from a mounted Laserfiche 11 ISO file.",
     symptoms: [

@@ -1,13 +1,13 @@
 # FicheBait Error Helper Quality Report
 
-Generated: 2026-07-19
+Generated: 2026-08-27
 
 ## Summary
 
-- Published entries: 2334
-- Reviewed sources: 1556
+- Published entries: 2337
+- Reviewed sources: 1562
 - Entries needing validation: 0
-- Entries with scenario variants: 20
+- Entries with scenario variants: 22
 - High-priority unresolved reviewed sources: 2
 - Thin-coverage products with fewer than 5 entries: 1
 - Repeated-code clusters to review for scenario modeling: 148
@@ -16,16 +16,16 @@ Generated: 2026-07-19
 
 | Confidence | Entries |
 | --- | --- |
-| high | 88 |
-| low | 1564 |
-| medium | 682 |
+| high | 90 |
+| low | 1563 |
+| medium | 684 |
 
 ## Fix Status Coverage
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 357 |
-| known-fix | 120 |
+| diagnostic-only | 358 |
+| known-fix | 122 |
 | needs-review | 1533 |
 | workaround | 324 |
 
@@ -34,7 +34,7 @@ Generated: 2026-07-19
 | Validation status | Entries |
 | --- | --- |
 | official-doc-baseline | 1194 |
-| reviewed-diagnostic | 801 |
+| reviewed-diagnostic | 804 |
 
 ## Validation Queue by Product
 
@@ -71,9 +71,9 @@ Generated: 2026-07-19
 | Review status | Sources |
 | --- | --- |
 | cross-product | 65 |
-| curated | 425 |
-| curated-partial | 447 |
-| curated-unresolved | 613 |
+| curated | 429 |
+| curated-partial | 450 |
+| curated-unresolved | 612 |
 | no-matching-posts | 2 |
 | not-actionable | 4 |
 
@@ -95,8 +95,8 @@ Generated: 2026-07-19
 | --- | --- | --- |
 | Laserfiche Server/Repository Server | 1238 | 1328 |
 | Windows Client/Desktop Client | 239 | 241 |
-| Forms | 144 | 181 |
-| Directory Server | 106 | 107 |
+| Forms | 145 | 185 |
+| Directory Server | 107 | 109 |
 | Web Client | 91 | 98 |
 | WebLink | 87 | 90 |
 | Workflow | 83 | 90 |
@@ -116,13 +116,13 @@ Generated: 2026-07-19
 | 784 | 8 | Full Text Search, Laserfiche Server/Repository Server | 1 |
 | 0x80040310 | 7 | Laserfiche Installer, Web Client, Windows Client/Desktop Client | 0 |
 | 9010 | 7 | API Server, Laserfiche Server/Repository Server, Mobile, Quick Fields, Workflow | 1 |
-| 10061 | 7 | Forms, Quick Fields, Workflow | 0 |
 | 42000 | 7 | Audit Trail, Discussions, Forms, Laserfiche Server/Repository Server, Quick Fields, Workflow | 0 |
 | 0x80004002 | 6 | Laserfiche Server/Repository Server, Windows Client/Desktop Client, Workflow | 1 |
 | 0x80004005 | 6 | Directory Server, Forms, Windows Client/Desktop Client, Workflow | 0 |
 | 404 | 6 | API Server, Laserfiche Server/Repository Server, WebLink, Workflow | 1 |
 | 500 | 6 | Audit Trail, Laserfiche Server/Repository Server, Mobile, WebLink | 0 |
 | 780 | 6 | Laserfiche Server/Repository Server, Snapshot, Web Client | 1 |
+| 10061 | 6 | Forms, Quick Fields, Workflow | 0 |
 | 0x800706BA | 5 | Distributed Computing Cluster, Forms, Quick Fields | 0 |
 | 0x80005000 | 5 | Directory Server, Workflow | 0 |
 | 0x80131040 | 5 | API Server, Directory Server, Web Client | 0 |
