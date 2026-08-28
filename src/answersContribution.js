@@ -48,16 +48,28 @@ export function answersTargetLabel(target) {
   return target.scenario ? `${target.scenario.title} - ${target.source.title}` : target.source.title;
 }
 
+function answersOutcomeSentence(value) {
+  const sentences = {
+    resolved: "This resolved the issue in my environment.",
+    "not-resolved": "This did not resolve the issue in my environment.",
+    "partially-helped": "This partially helped in my environment, but additional troubleshooting was still required.",
+    "another-cause": "I found that the issue had a different cause in my environment.",
+    "another-fix": "I resolved the issue in my environment, but with a different fix.",
+  };
+  return sentences[value] ?? `My result was: ${answersOutcomeLabel(value)}.`;
+}
+
 export function buildAnswersReply({ entry, source, scenario, outcome, versionBuild, context }) {
-  const lines = [
-    `Product: ${entry.product}`,
-    `Version/build: ${versionBuild.trim()}`,
-    `Error: ${entry.code} - ${entry.message}`,
-    `Scenario or source reviewed: ${scenario?.title ?? source.title}`,
-    `Outcome: ${answersOutcomeLabel(outcome)}`,
+  const version = versionBuild.trim() || "version/build not specified";
+  const paragraphs = [
+    `I tested this while troubleshooting ${entry.code} - ${entry.message} in ${entry.product} (${version}).`,
+    scenario
+      ? `The troubleshooting context matched "${scenario.title}". ${answersOutcomeSentence(outcome)}`
+      : `I followed the guidance in "${source.title}". ${answersOutcomeSentence(outcome)}`,
   ];
 
   const trimmedContext = context.trim();
-  if (trimmedContext) lines.push(`Additional relevant details: ${trimmedContext}`);
-  return lines.join("\n");
+  if (trimmedContext) paragraphs.push(`Here are the additional details from my testing:\n${trimmedContext}`);
+  paragraphs.push("I hope this context helps others investigating the same error.");
+  return paragraphs.join("\n\n");
 }

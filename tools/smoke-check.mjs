@@ -137,7 +137,10 @@ try {
   await answersTargetSelect.selectOption("1");
   await answersDialog.getByLabel("Laserfiche version and build").fill("Version 12 build 1202");
   await answersDialog.getByLabel("Outcome").selectOption("partially-helped");
-  await expectVisible(answersDialog.getByText("Outcome: Partially helped"), "Answers response preview did not update.");
+  await expectVisible(
+    answersDialog.getByText("This partially helped in my environment, but additional troubleshooting was still required.", { exact: false }),
+    "Answers response preview did not update with conversational outcome text.",
+  );
   const answersAccessibilityResults = await new AxeBuilder({ page }).include(".answers-contribution-dialog").analyze();
   const seriousAnswersAccessibilityIssues = answersAccessibilityResults.violations.filter((issue) => ["serious", "critical"].includes(issue.impact));
   if (seriousAnswersAccessibilityIssues.length) {
