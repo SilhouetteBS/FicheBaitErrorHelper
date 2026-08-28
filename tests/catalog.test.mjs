@@ -13,6 +13,16 @@ test("catalog and ledger identifiers are unique", () => {
   assert.equal(new Set(reviewedSources.map((source) => source.url)).size, reviewedSources.length);
 });
 
+test("duplicate error contexts are merged without breaking legacy links", () => {
+  const formsLff706Entries = errorEntries.filter((entry) => entry.product === "Forms" && entry.code === "LFF706");
+  assert.equal(formsLff706Entries.length, 1);
+  const [entry] = formsLff706Entries;
+  assert.equal(entry.id, "forms-lff706-unable-to-trigger-routing");
+  assert.ok(entry.aliases.includes("forms-lff706-routing-endpoint"));
+  assert.equal(entry.scenarios.length, 3);
+  assert.equal(entry.sources.length, 3);
+});
+
 test("every official product and code remains represented", () => {
   const published = new Set(errorEntries.map((entry) => `${entry.product}\u0000${entry.code}`));
   for (const entry of officialDocumentationErrorEntries) {

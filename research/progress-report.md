@@ -1,10 +1,10 @@
 # FicheBait Error Helper Progress Report
 
-Generated: 2026-08-27
+Generated: 2026-08-28
 
 ## Summary
 
-- Published helper entries: 2339
+- Published helper entries: 2338
 - Reviewed source ledger rows: 1563
 - Discovery rows tracked: 4081
 - Remaining candidate rows: 71
@@ -13,7 +13,7 @@ Generated: 2026-08-27
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 360 |
+| diagnostic-only | 359 |
 | known-fix | 125 |
 | needs-review | 1530 |
 | workaround | 324 |
@@ -54,7 +54,7 @@ Generated: 2026-08-27
 | Discussions | 7 | 0 |
 | Distributed Computing Cluster | 11 | 0 |
 | Federated Search | 7 | 0 |
-| Forms | 148 | 4 |
+| Forms | 147 | 4 |
 | Full Text Search | 17 | 0 |
 | Import Agent | 33 | 3 |
 | Laserfiche Installer | 17 | 1 |

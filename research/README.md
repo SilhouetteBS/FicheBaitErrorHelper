@@ -4,7 +4,7 @@ This folder contains sanitized aggregate reports. Raw captures and partially rev
 
 ## Current Published Totals
 
-- Error entries: 2339
+- Error entries: 2338
 - Reviewed sources: 1563
 - Needs-review entries: 381
 - Support KB promoted entries: 313

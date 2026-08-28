@@ -1,30 +1,30 @@
 # FicheBait Error Helper Quality Report
 
-Generated: 2026-08-27
+Generated: 2026-08-28
 
 ## Summary
 
-- Published entries: 2339
+- Published entries: 2338
 - Reviewed sources: 1563
 - Entries needing validation: 0
 - Entries with scenario variants: 24
 - High-priority unresolved reviewed sources: 2
 - Thin-coverage products with fewer than 5 entries: 1
-- Repeated-code clusters to review for scenario modeling: 150
+- Repeated-code clusters to review for scenario modeling: 149
 
 ## Confidence Coverage
 
 | Confidence | Entries |
 | --- | --- |
 | high | 94 |
-| low | 1563 |
+| low | 1562 |
 | medium | 682 |
 
 ## Fix Status Coverage
 
 | Fix status | Entries |
 | --- | --- |
-| diagnostic-only | 360 |
+| diagnostic-only | 359 |
 | known-fix | 125 |
 | needs-review | 1530 |
 | workaround | 324 |
@@ -34,7 +34,7 @@ Generated: 2026-08-27
 | Validation status | Entries |
 | --- | --- |
 | official-doc-baseline | 1194 |
-| reviewed-diagnostic | 806 |
+| reviewed-diagnostic | 805 |
 
 ## Validation Queue by Product
 
@@ -95,7 +95,7 @@ Generated: 2026-08-27
 | --- | --- | --- |
 | Laserfiche Server/Repository Server | 1245 | 1336 |
 | Windows Client/Desktop Client | 251 | 253 |
-| Forms | 148 | 188 |
+| Forms | 147 | 188 |
 | Directory Server | 109 | 111 |
 | Web Client | 91 | 98 |
 | Workflow | 90 | 97 |

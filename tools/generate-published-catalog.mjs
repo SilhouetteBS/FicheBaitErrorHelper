@@ -39,6 +39,7 @@ function searchEntry(entry) {
   const reviewStatuses = [...new Set(entry.sources.map((source) => reviewStatusByUrl.get(source.url) ?? "curated"))];
   return {
     id: entry.id,
+    ...(entry.aliases?.length ? { aliases: entry.aliases } : {}),
     code: entry.code,
     message: entry.message,
     product: entry.product,

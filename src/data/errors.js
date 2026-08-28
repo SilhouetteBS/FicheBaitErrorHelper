@@ -4092,38 +4092,6 @@ const curatedErrorEntries = [
     ],
   },
   {
-    id: "forms-lff706-routing-endpoint",
-    code: "LFF706",
-    message: "Unable to trigger routing.",
-    product: "Forms",
-    versions: ["Version 11"],
-    confidence: "low",
-    fixStatus: "diagnostic-only",
-    validationStatus: "reviewed-diagnostic",
-    reviewedDate: "2026-06-27",
-    summary:
-      "Forms can report LFF706 while editing variables in an in-progress instance when the Forms IIS application cannot connect to the Forms Routing Service.",
-    symptoms: [
-      "Editing variables on an in-progress Forms instance fails.",
-      "The UI says Forms must be configured properly and suggests restarting the Forms Routing Service.",
-      "Restarting the routing service may not immediately resolve the issue.",
-    ],
-    likelyFixes: [
-      "Check the lfrouting endpoint in Forms/Web.config on the Forms IIS server.",
-      "Confirm the Forms IIS app and Forms Routing Service are using the expected server and net.tcp port.",
-      "Check for port conflicts and open a support case if the endpoint configuration looks correct.",
-    ],
-    notes: "Laserfiche employee guidance provides connection and endpoint checks but no final confirmed resolution was posted.",
-    sources: [
-      {
-        sourceType: "answers-laserfiche-employee",
-        title: "Forms 11- Trying to edit Variables in an In Progress Forms instance throws [LFF706-UnableToTriggerRouting] error",
-        url: "https://answers.laserfiche.com/questions/201552/Forms-11-Trying-to-edit-Variables-in-an-In-Progress-Forms-instance-throws-LFF706UnableToTriggerRouting-error",
-        note: "Ziyan Chen from Laserfiche says the Forms IIS server cannot connect to the Forms Routing Service and recommends checking the lfrouting endpoint.",
-      },
-    ],
-  },
-  {
     id: "forms-routing-service-not-listening",
     code: "FORMS-ROUTING-NOT-LISTENING",
     message: "Forms Routing Service is running but not listening on its port.",
@@ -9140,22 +9108,73 @@ const curatedErrorEntries = [
   },
   {
     id: "forms-lff706-unable-to-trigger-routing",
+    aliases: ["forms-lff706-routing-endpoint"],
     code: "LFF706",
-    message: "Unable to trigger Forms routing.",
+    message: "Unable to trigger routing.",
     product: "Forms",
     versions: ["Version 10", "Version 11"],
     confidence: "low",
     fixStatus: "diagnostic-only",
+    validationStatus: "reviewed-diagnostic",
     reviewedDate: "2026-06-28",
     summary:
-      "Forms can report LFF706-UnableToTriggerRouting, sometimes with socket timeout 10060, when routing cannot be triggered.",
-    symptoms: ["Submission or in-progress routing reports LFF706-UnableToTriggerRouting.", "The details may include timeout code 10060."],
+      "Forms reports LFF706-UnableToTriggerRouting when its web application or another Forms component cannot trigger the Routing Service. The underlying context can be an endpoint connection failure, socket timeout 10060, or post-upgrade service configuration mismatch.",
+    symptoms: [
+      "Submission, an in-progress instance operation, or another routing action reports LFF706-UnableToTriggerRouting.",
+      "The details may mention the Forms Routing Service, an lfrouting endpoint, socket timeout 10060, or LFF3004-UnableToOpenServiceProxy.",
+    ],
     likelyFixes: [
-      "Check Forms Routing Service availability and network connectivity between Forms components.",
+      "Confirm the Forms Routing Service is running and reachable from each Forms web or portal server.",
+      "Check the lfrouting endpoint in Forms/Web.config and verify the expected server and net.tcp port.",
       "Review firewall, proxy, or DMZ rules if timeout 10060 is present.",
-      "Capture LFForms and routing logs before retrying the affected instance.",
+      "After an upgrade, verify Forms service URLs do not contain stale hostnames, ports, or protocol settings.",
+      "Capture LFForms and Routing Service logs at the failure timestamp before retrying the affected operation.",
     ],
     scenarios: [
+      {
+        title: "Forms IIS cannot reach the Routing Service endpoint",
+        summary:
+          "Editing an in-progress Forms instance can fail when the Forms IIS application cannot connect to the configured lfrouting endpoint.",
+        versions: ["Version 11"],
+        symptoms: [
+          "Editing variables on an in-progress Forms instance fails with LFF706.",
+          "The UI says Forms must be configured properly and suggests restarting the Forms Routing Service.",
+          "Restarting the service does not immediately resolve the failure.",
+        ],
+        causes: [
+          "The Forms IIS application cannot connect to the Forms Routing Service at the configured lfrouting endpoint.",
+          "The configured server, net.tcp port, or listener may not match the active Routing Service endpoint.",
+        ],
+        fixes: [
+          "Check the lfrouting endpoint in Forms/Web.config on the Forms IIS server.",
+          "Confirm the Forms IIS application and Forms Routing Service use the expected server and net.tcp port.",
+          "Check for port conflicts and open a support case if the endpoint configuration and listener appear correct.",
+        ],
+        sourceUrls: [
+          "https://answers.laserfiche.com/questions/201552/Forms-11-Trying-to-edit-Variables-in-an-In-Progress-Forms-instance-throws-LFF706UnableToTriggerRouting-error",
+        ],
+      },
+      {
+        title: "Routing request reaches socket timeout 10060",
+        summary:
+          "LFF706 can include socket timeout 10060 when a Forms component cannot establish the required network connection for routing.",
+        versions: ["Version 10"],
+        symptoms: [
+          "A Forms submission or routing action reports LFF706-UnableToTriggerRouting.",
+          "The error details include socket timeout 10060.",
+        ],
+        causes: [
+          "Network, firewall, proxy, or DMZ rules may prevent a Forms component from reaching the routing endpoint.",
+        ],
+        fixes: [
+          "Confirm the Forms Routing Service is available from the server handling the failed request.",
+          "Review firewall, proxy, and DMZ rules for the configured routing endpoint and port.",
+          "Capture LFForms, Routing Service, and network evidence at the same timestamp before retrying.",
+        ],
+        sourceUrls: [
+          "https://answers.laserfiche.com/questions/159690/LFF706UnableToTriggerRouting",
+        ],
+      },
       {
         title: "Forms 11 upgrade with LFF3004 service proxy errors",
         summary:
@@ -9179,7 +9198,15 @@ const curatedErrorEntries = [
         ],
       },
     ],
+    notes:
+      "The endpoint diagnosis comes from Laserfiche employee guidance, but that thread does not report a final confirmed resolution. Timeout and post-upgrade remediation remain specific to their linked scenarios.",
     sources: [
+      {
+        sourceType: "answers-laserfiche-employee",
+        title: "Forms 11- Trying to edit Variables in an In Progress Forms instance throws [LFF706-UnableToTriggerRouting] error",
+        url: "https://answers.laserfiche.com/questions/201552/Forms-11-Trying-to-edit-Variables-in-an-In-Progress-Forms-instance-throws-LFF706UnableToTriggerRouting-error",
+        note: "Ziyan Chen from Laserfiche says the Forms IIS server cannot connect to the Forms Routing Service and recommends checking the lfrouting endpoint.",
+      },
       {
         sourceType: "answers-community",
         title: "LFF706UnableToTriggerRouting",

@@ -174,6 +174,12 @@ try {
   if (faviconStatus !== 200) throw new Error(`Favicon returned HTTP ${faviconStatus}.`);
   await page.goto(`${baseUrl}?error=lf-server-9030-session-license-limit`, { waitUntil: "networkidle" });
   await expectVisible(page.getByText("Resolution Paths"), "Direct error link did not hydrate its product detail module.");
+  await page.goto(`${baseUrl}?q=lff-706&error=forms-lff706-routing-endpoint`, { waitUntil: "networkidle" });
+  await expectVisible(page.getByRole("heading", { name: "LFF706" }), "Legacy merged-entry link did not open the canonical LFF706 entry.");
+  await page.waitForURL(/error=forms-lff706-unable-to-trigger-routing/);
+  if ((await page.locator(".resolution-path").count()) !== 4) {
+    throw new Error("Merged LFF706 entry did not render its three source-specific scenarios and general checklist.");
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileBack = page.getByRole("button", { name: "Back to results" });
   await expectVisible(mobileBack, "Mobile error detail did not provide a Back to results action.");

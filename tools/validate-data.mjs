@@ -12,6 +12,7 @@ const validFixStatuses = new Set(["known-fix", "workaround", "diagnostic-only", 
 const validValidationStatuses = new Set(["official-doc-baseline", "reviewed-diagnostic", "source-research-needed"]);
 const sortedProducts = [...productOptions].sort((a, b) => a.localeCompare(b));
 const entryIds = new Set();
+const entryAliases = new Set();
 const ledgerIds = new Set();
 const ledgerUrls = new Set();
 
@@ -24,8 +25,14 @@ if (productOptions.some((product, index) => product !== sortedProducts[index])) 
 }
 
 for (const entry of errorEntries) {
-  if (entryIds.has(entry.id)) errors.push(`Duplicate entry id ${entry.id}`);
+  if (entryIds.has(entry.id) || entryAliases.has(entry.id)) errors.push(`Duplicate entry id or alias ${entry.id}`);
   entryIds.add(entry.id);
+  for (const alias of entry.aliases ?? []) {
+    if (!alias || entryIds.has(alias) || entryAliases.has(alias)) {
+      errors.push(`${entry.id} uses duplicate or invalid alias ${alias}`);
+    }
+    entryAliases.add(alias);
+  }
   for (const field of ["id", "code", "message", "product", "confidence", "reviewedDate", "summary"]) {
     if (!entry[field]) errors.push(`${entry.id || "unknown"} is missing ${field}`);
   }

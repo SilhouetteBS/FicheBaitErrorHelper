@@ -31,9 +31,11 @@ export async function loadCatalogData() {
       return candidateReviewsPromise;
     },
     async loadEntry(entryId) {
-      const product = indexModule.catalogIndex.find((entry) => entry.id === entryId)?.product;
-      const entries = await loadProduct(product);
-      return entries.find((entry) => entry.id === entryId) ?? null;
+      const indexEntry = indexModule.catalogIndex.find(
+        (entry) => entry.id === entryId || entry.aliases?.includes(entryId),
+      );
+      const entries = await loadProduct(indexEntry?.product);
+      return entries.find((entry) => entry.id === indexEntry?.id) ?? null;
     },
   };
 }

@@ -148,6 +148,15 @@ function initialParam(name, fallback = allOption) {
   return url.searchParams.get(name) || fallback;
 }
 
+function entryMatchesId(entry, entryId) {
+  return entry?.id === entryId || entry?.aliases?.includes(entryId);
+}
+
+function canonicalEntryId(entries, entryId) {
+  if (!entryId) return null;
+  return entries.find((entry) => entryMatchesId(entry, entryId))?.id ?? null;
+}
+
 function setErrorUrl(entryId) {
   const url = new URL(window.location.href);
   if (entryId) url.searchParams.set("error", entryId);
@@ -334,7 +343,9 @@ function App() {
 
   useEffect(() => {
     if (!catalog || !selectedId) return;
-    if (!errorEntries.some((entry) => entry.id === selectedId)) setSelectedId(null);
+    const canonicalId = canonicalEntryId(errorEntries, selectedId);
+    if (!canonicalId) setSelectedId(null);
+    else if (canonicalId !== selectedId) setSelectedId(canonicalId);
   }, [catalog, errorEntries, selectedId]);
 
   useEffect(() => {
@@ -478,12 +489,12 @@ function App() {
       });
   }, [deferredQuery, errorEntries, loadedReviewedSources, product, version, source, confidence, fixStatus, scenarioFilter, researchFilter, validationFilter, reviewStatusFilter, sortBy]);
 
-  const selectedSummary = selectedId ? errorEntries.find((entry) => entry.id === selectedId) : null;
+  const selectedSummary = selectedId ? errorEntries.find((entry) => entryMatchesId(entry, selectedId)) : null;
   const latestSourceDate = catalog?.stats.latestSourceDate;
 
   useEffect(() => {
     if (!catalog || !selectedId) return;
-    if (!filteredEntries.some((entry) => entry.id === selectedId)) setSelectedId(null);
+    if (!filteredEntries.some((entry) => entryMatchesId(entry, selectedId))) setSelectedId(null);
   }, [catalog, filteredEntries, selectedId]);
 
   const qualitySummary = useMemo(() => {
